@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>臺語學習 Taiwanese Hokkien</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;900&family=Outfit:wght@300;400;500;600;700&display=swap');
+  :root {
+    --bg:#0f0e0c;--surface:#1a1916;--surface2:#242220;--surface3:#2e2b28;
+    --border:#3a3630;--accent:#e8a23c;--accent2:#c9773a;--accent3:#7ec8a4;
+    --accent4:#6fb3d9;--text:#f0ebe3;--text2:#a89f93;--text3:#6b6358;
+    --red:#e06060;--green:#7ec8a4;--radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden;}
+  button,-webkit-tap-highlight-color:transparent;
+  button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+
+  /* HEADER */
+  .header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;position:sticky;top:0;z-index:100;}
+  .header-title{font-family:'Noto Serif TC',serif;font-size:17px;font-weight:900;color:var(--accent);}
+  .header-sub{font-size:11px;color:var(--text3);font-weight:300;}
+
+  /* TABS */
+  .tabs{display:flex;gap:3px;padding:6px 12px;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tab{padding:6px 12px;border-radius:8px;border:none;background:transparent;color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.2s;}
+  .tab:hover{background:var(--surface2);color:var(--text);}
+  .tab.active{background:var(--accent);color:#1a1200;font-weight:600;}
+
+  /* MAIN */
+  .main{padding:12px 16px;max-width:900px;margin:0 auto;}
+
+  /* FILTER PANEL */
+  .filter-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;}
+  .filter-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+  .filter-groups{display:flex;flex-direction:column;gap:10px;}
+  .filter-group-label{font-size:11px;color:var(--text3);margin-bottom:5px;font-weight:500;}
+  .filter-chips{display:flex;flex-wrap:wrap;gap:5px;}
+  .chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;user-select:none;min-height:34px;}
+  .chip:hover{border-color:var(--accent);color:var(--text);}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#1a1200;font-weight:600;}
+  .chip.cat-noun.active{background:#6fb3d9;border-color:#6fb3d9;}
+  .chip.cat-verb.active{background:#e07a5f;border-color:#e07a5f;}
+  .chip.cat-adj.active{background:#7ec8a4;border-color:#7ec8a4;}
+  .chip.cat-particle.active{background:#c9a96e;border-color:#c9a96e;}
+  .display-options{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:center;}
+  .toggle-btn{padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all 0.15s;min-height:36px;}
+  .toggle-btn.on{background:var(--surface3);border-color:var(--accent3);color:var(--accent3);}
+
+  /* FLASHCARD */
+  .card-area{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .card-counter{font-size:12px;color:var(--text3);}
+  .flashcard-wrap{width:100%;max-width:520px;cursor:pointer;background:none;border:none;padding:0;display:block;text-align:left;font-family:inherit;-webkit-tap-highlight-color:transparent;}
+  .flashcard-inner{position:relative;width:100%;min-height:240px;}
+  .flashcard-face{background:var(--surface);border:1px solid var(--border);border-radius:20px;min-height:240px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;position:absolute;top:0;left:0;right:0;transition:opacity 0.3s ease;}
+  .flashcard-face.front{opacity:1;pointer-events:auto;z-index:2;}
+  .flashcard-face.back{opacity:0;pointer-events:none;z-index:1;}
+  .flashcard-inner.flipped .flashcard-face.front{opacity:0;pointer-events:none;z-index:1;}
+  .flashcard-inner.flipped .flashcard-face.back{opacity:1;pointer-events:auto;z-index:2;}
+  .card-type-badge{position:absolute;top:12px;right:12px;padding:3px 9px;border-radius:10px;font-size:10px;font-weight:600;background:var(--surface3);color:var(--text3);}
+  .card-subcat{position:absolute;top:12px;left:12px;padding:3px 9px;border-radius:10px;font-size:10px;color:var(--text3);background:var(--surface3);}
+  .card-char{font-family:'Noto Serif TC',serif;font-size:52px;font-weight:900;color:var(--text);text-align:center;line-height:1.1;}
+  .card-romaji{font-size:19px;color:var(--accent);margin-top:8px;font-weight:500;text-align:center;}
+  .card-meaning{font-size:20px;color:var(--text);text-align:center;font-weight:400;}
+  .card-examples{margin-top:14px;display:flex;flex-direction:column;gap:7px;width:100%;}
+  .example-item{background:var(--surface2);border-radius:8px;padding:7px 11px;font-size:12px;color:var(--text2);}
+  .example-item span{color:var(--accent);font-size:11px;}
+  .click-hint{position:absolute;bottom:10px;font-size:11px;color:var(--text3);}
+
+  .card-nav{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .nav-btn{padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;min-height:44px;}
+  .nav-btn:hover{background:var(--surface3);border-color:var(--accent);}
+  .nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#1a1200;font-weight:600;}
+  .nav-btn.primary:hover{background:var(--accent2);}
+  .nav-btn.danger{background:rgba(224,96,96,0.1);border-color:var(--red);color:var(--red);}
+
+  .progress-bar-wrap{width:100%;max-width:520px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+  .progress-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.3s ease;}
+
+  /* LEARN MODE */
+  .learn-card{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:20px 20px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .learn-prompt{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;}
+  .learn-question{font-family:'Noto Serif TC',serif;font-size:44px;font-weight:900;text-align:center;color:var(--text);line-height:1.1;}
+  .learn-question.romaji{font-family:'Outfit',sans-serif;font-size:30px;font-weight:600;color:var(--accent);}
+  .learn-question.meaning{font-family:'Outfit',sans-serif;font-size:26px;color:var(--text);}
+  .learn-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;}
+  .learn-option{padding:13px 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;font-weight:400;cursor:pointer;transition:all 0.15s;text-align:center;line-height:1.3;min-height:50px;}
+  .learn-option:hover:not(.disabled){border-color:var(--accent4);background:var(--surface3);}
+  .learn-option.correct{border-color:var(--green);background:rgba(126,200,164,0.12);color:var(--green);font-weight:600;}
+  .learn-option.wrong{border-color:var(--red);background:rgba(224,96,96,0.1);color:var(--red);}
+  .learn-option.disabled{cursor:default;}
+  .learn-feedback{padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;text-align:center;width:100%;}
+  .learn-feedback.correct{background:rgba(126,200,164,0.12);border:1px solid var(--green);color:var(--green);}
+  .learn-feedback.wrong{background:rgba(224,96,96,0.1);border:1px solid var(--red);color:var(--red);}
+  .learn-stats{display:flex;gap:10px;width:100%;max-width:560px;margin-bottom:4px;}
+  .stat-box{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 10px;text-align:center;}
+  .stat-num{font-size:18px;font-weight:700;}
+  .stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;}
+  .stat-num.green{color:var(--green);}
+  .stat-num.red{color:var(--red);}
+  .stat-num.yellow{color:var(--accent);}
+
+  /* PROGRESS TAB */
+  .progress-section{display:flex;flex-direction:column;gap:16px;}
+  .progress-overview{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .overview-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;}
+  .overview-num{font-size:32px;font-weight:700;}
+  .overview-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-top:4px;}
+  .mastered-num{color:var(--green);}
+  .learning-num{color:var(--accent);}
+  .unseen-num{color:var(--text3);}
+  .ring-wrap{display:flex;justify-content:center;margin:4px 0;}
+
+  .progress-list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .progress-list-title{font-size:13px;font-weight:600;color:var(--text2);}
+  .progress-filter-btns{display:flex;gap:5px;}
+  .pfbtn{padding:5px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-size:12px;cursor:pointer;min-height:32px;}
+  .pfbtn.active{background:var(--surface3);border-color:var(--accent);color:var(--accent);}
+
+  .word-progress-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:6px;}
+  .wpr-char{font-family:'Noto Serif TC',serif;font-size:22px;font-weight:900;min-width:40px;}
+  .wpr-info{flex:1;}
+  .wpr-rom{font-size:12px;color:var(--accent);font-weight:500;}
+  .wpr-meaning{font-size:12px;color:var(--text2);}
+  .wpr-status{display:flex;align-items:center;gap:6px;}
+  .status-pill{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;}
+  .status-mastered{background:rgba(126,200,164,0.15);color:var(--green);}
+  .status-learning{background:rgba(232,162,60,0.15);color:var(--accent);}
+  .status-unseen{background:var(--surface3);color:var(--text3);}
+  .wpr-score{font-size:11px;color:var(--text3);}
+  .reset-word-btn{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:4px;min-width:28px;min-height:28px;}
+  .reset-word-btn:hover{color:var(--red);}
+
+  /* CUSTOM VOCAB */
+  .add-vocab-btn{display:flex;align-items:center;gap:8px;padding:12px 20px;border-radius:12px;border:1px dashed var(--border);background:var(--surface);color:var(--text2);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;width:100%;justify-content:center;margin-bottom:16px;min-height:48px;transition:all 0.15s;}
+  .add-vocab-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+  /* MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;}
+  .modal-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:18px;}
+  .form-group{margin-bottom:14px;}
+  .form-label{font-size:12px;color:var(--text3);font-weight:500;margin-bottom:5px;display:block;}
+  .form-input{width:100%;padding:10px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;}
+  .form-input:focus{border-color:var(--accent);}
+  .form-select{width:100%;padding:10px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;cursor:pointer;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .modal-actions{display:flex;gap:10px;margin-top:18px;}
+  .modal-actions .nav-btn{flex:1;justify-content:center;}
+
+  /* SANDHI */
+  .sandhi-section{display:flex;flex-direction:column;gap:18px;}
+  .sandhi-rules{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+  .rules-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px;cursor:pointer;background:none;border:none;padding:0;width:100%;font-family:inherit;text-align:left;}
+  .rules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;}
+  .rule-item{background:var(--surface2);border-radius:8px;padding:9px 12px;font-size:12px;}
+  .rule-tone{color:var(--accent);font-weight:600;font-size:15px;}
+  .rule-arrow{color:var(--text3);margin:0 4px;}
+  .rule-result{color:var(--accent3);font-weight:600;font-size:15px;}
+  .rule-name{color:var(--text3);font-size:10px;margin-top:2px;}
+  .sandhi-practice-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:18px;max-width:560px;width:100%;margin:0 auto;}
+  .sandhi-word-display{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .sandhi-syllable{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .sandhi-char{font-family:'Noto Serif TC',serif;font-size:36px;font-weight:900;color:var(--text);}
+  .sandhi-rom{font-size:14px;color:var(--accent);font-weight:500;}
+  .sandhi-arrow{font-size:20px;color:var(--text3);}
+  .sandhi-input-area{display:flex;flex-direction:column;gap:9px;width:100%;}
+  .sandhi-question{font-size:14px;color:var(--text2);text-align:center;}
+  .tone-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;width:100%;}
+  .tone-btn{padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;text-align:center;min-height:52px;}
+  .tone-btn:hover{border-color:var(--accent);background:var(--surface3);}
+  .tone-btn.selected{border-color:var(--accent);background:rgba(232,162,60,0.15);color:var(--accent);font-weight:600;}
+  .tone-btn.correct-ans{border-color:var(--green);background:rgba(126,200,164,0.12);color:var(--green);}
+  .tone-btn.wrong-ans{border-color:var(--red);background:rgba(224,96,96,0.1);color:var(--red);}
+  .tone-key{display:inline-block;background:var(--surface3);border-radius:4px;padding:0 5px;font-size:11px;font-weight:700;color:var(--accent);margin-right:2px;}
+  .sandhi-submit{padding:12px 28px;border-radius:10px;border:none;background:var(--accent);color:#1a1200;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;min-height:44px;}
+  .sandhi-submit:hover{background:var(--accent2);}
+  .sandhi-submit:disabled{opacity:0.4;cursor:default;}
+  .sandhi-feedback{padding:11px 18px;border-radius:10px;font-size:13px;font-weight:500;text-align:center;width:100%;}
+  .sandhi-feedback.correct{background:rgba(126,200,164,0.12);border:1px solid var(--green);color:var(--green);}
+  .sandhi-feedback.wrong{background:rgba(224,96,96,0.1);border:1px solid var(--red);color:var(--red);}
+
+
+  /* SANDHI EXTRA */
+  .sandhi-mode-tabs{display:flex;gap:6px;margin-bottom:4px;}
+  .sandhi-mode-btn{padding:7px 16px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer;min-height:36px;transition:all 0.15s;}
+  .sandhi-mode-btn.active{background:var(--accent);border-color:var(--accent);color:#1a1200;font-weight:600;}
+  .sandhi-options-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  .sandhi-kbd-hint{font-size:11px;color:var(--text3);text-align:center;}
+
+  /* BLITZ MODE */
+  .blitz-card{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:24px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;margin:0 auto;}
+  .blitz-timer-wrap{width:100%;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+  .blitz-timer-bar{height:100%;background:var(--accent);border-radius:4px;transition:width 0.1s linear;}
+  .blitz-timer-bar.urgent{background:var(--red);}
+  .blitz-time-num{font-size:28px;font-weight:700;color:var(--accent);}
+  .blitz-time-num.urgent{color:var(--red);}
+  .blitz-score-row{display:flex;gap:16px;align-items:center;}
+  .blitz-score{font-size:20px;font-weight:700;}
+  .blitz-word{font-family:'Noto Serif TC',serif;font-size:48px;font-weight:900;color:var(--text);text-align:center;line-height:1;}
+  .blitz-rom{font-size:18px;color:var(--accent);font-weight:500;text-align:center;}
+  .blitz-question{font-size:14px;color:var(--text2);text-align:center;}
+  .blitz-flash{position:fixed;inset:0;pointer-events:none;z-index:300;opacity:0;transition:opacity 0.15s;}
+  .blitz-flash.correct{background:rgba(126,200,164,0.18);}
+  .blitz-flash.wrong{background:rgba(224,96,96,0.15);}
+  .blitz-result{width:100%;max-width:560px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;margin:0 auto;text-align:center;}
+  .blitz-result-score{font-size:56px;font-weight:900;color:var(--accent);}
+  .blitz-result-label{font-size:14px;color:var(--text2);}
+  .blitz-result-breakdown{display:flex;gap:16px;justify-content:center;margin-top:4px;}
+  .blitz-key-hint{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;width:100%;}
+  .bkh{padding:8px 4px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);font-size:11px;text-align:center;color:var(--text2);}
+  .bkh kbd{display:block;font-size:16px;font-weight:700;color:var(--accent);margin-bottom:2px;}
+
+  /* BROWSE */
+  .word-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;}
+  .word-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all 0.15s;position:relative;}
+  .word-tile:hover{border-color:var(--accent);transform:translateY(-1px);}
+  .tile-char{font-family:'Noto Serif TC',serif;font-size:26px;font-weight:900;color:var(--text);}
+  .tile-rom{font-size:12px;color:var(--accent);margin-top:2px;font-weight:500;}
+  .tile-meaning{font-size:11px;color:var(--text2);margin-top:3px;}
+  .tile-badge{display:inline-block;padding:2px 6px;border-radius:7px;font-size:10px;font-weight:600;margin-top:5px;}
+  .view-toggle{display:flex;gap:5px;margin-bottom:14px;}
+  .view-btn{padding:6px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;min-height:34px;}
+  .view-btn.active{background:var(--surface3);border-color:var(--accent3);color:var(--accent3);}
+
+  /* CUSTOM vocab tag */
+  .custom-tag{background:rgba(177,138,217,0.15);color:#b18ad9;border:1px solid rgba(177,138,217,0.3);}
+
+  /* BADGES */
+  .badge-noun{background:rgba(111,179,217,0.15);color:var(--accent4);}
+  .badge-verb{background:rgba(224,122,95,0.15);color:#e07a5f;}
+  .badge-adj{background:rgba(126,200,164,0.15);color:var(--green);}
+  .badge-particle{background:rgba(201,169,110,0.15);color:#c9a96e;}
+  .badge-adv{background:rgba(177,138,217,0.15);color:#b18ad9;}
+  .hidden{display:none!important;}
+  .rules-collapsed{display:none;}
+
+  /* MOBILE */
+  @media(max-width:600px){
+    .main{padding:12px;}
+    .tabs{padding:8px 10px;gap:3px;}
+    .tab{padding:7px 10px;font-size:12px;}
+    .card-char{font-size:46px;}
+    .learn-options{grid-template-columns:1fr;}
+    .learn-option{min-height:52px;font-size:15px;}
+    .tone-buttons{grid-template-columns:repeat(2,1fr);}
+    .tone-btn{min-height:54px;}
+    .progress-overview{grid-template-columns:repeat(3,1fr);gap:8px;}
+    .overview-num{font-size:26px;}
+    .word-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));}
+    .form-row{grid-template-columns:1fr;}
+    .learn-question{font-size:42px;}
+    .learn-question.romaji{font-size:24px;}
+    .learn-question.meaning{font-size:20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">臺語學習</div>
+    <div class="header-sub">Taiwanese Hokkien · <span id="word-count">0</span> words</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('flashcards')">🃏 Cards</button>
+  <button class="tab" onclick="showTab('learn')">🧠 Learn</button>
+  <button class="tab" onclick="showTab('progress')">📊 Progress</button>
+  <button class="tab" onclick="showTab('sandhi')">🎵 Sandhi</button>
+  <button class="tab" onclick="showTab('browse')">📚 Browse</button>
+</div>
+
+<div class="main">
+
+  <!-- FLASHCARDS -->
+  <div id="tab-flashcards">
+    <div class="filter-panel">
+      <div class="filter-title">Filter by Type & Category</div>
+      <div class="filter-groups">
+        <div>
+          <div class="filter-group-label">Word Types</div>
+          <div class="filter-chips" id="type-chips"></div>
+        </div>
+        <div>
+          <div class="filter-group-label">Noun Subcategories</div>
+          <div class="filter-chips" id="noun-chips"></div>
+        </div>
+      </div>
+      <div class="display-options">
+        <span style="font-size:11px;color:var(--text3);align-self:center">Show:</span>
+        <button class="toggle-btn on" id="toggle-char" onclick="toggleDisplay('char')">漢字</button>
+        <button class="toggle-btn on" id="toggle-rom" onclick="toggleDisplay('rom')">Romanisation</button>
+        <button class="toggle-btn on" id="toggle-meaning" onclick="toggleDisplay('meaning')">Meaning</button>
+      </div>
+    </div>
+    <div class="card-area">
+      <div class="card-counter" id="fc-counter">Card 1 of 0</div>
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fc-progress" style="width:0%"></div></div>
+      <button class="flashcard-wrap" onclick="flipCard()" type="button" aria-label="Flip card">
+        <div class="flashcard-inner" id="flashcard-inner">
+          <div class="flashcard-face front" id="fc-front">
+            <div class="card-type-badge" id="fc-badge"></div>
+            <div class="card-subcat" id="fc-subcat"></div>
+            <div class="card-char" id="fc-char"></div>
+            <div class="card-romaji" id="fc-rom"></div>
+            <div class="card-meaning" id="fc-meaning"></div>
+            <div class="click-hint">tap to flip</div>
+          </div>
+          <div class="flashcard-face back" id="fc-back">
+            <div class="card-char" id="fc-back-char" style="font-size:38px"></div>
+            <div class="card-romaji" id="fc-back-rom"></div>
+            <div class="card-meaning" id="fc-back-meaning"></div>
+            <div class="card-examples" id="fc-examples"></div>
+            <div class="click-hint">tap to flip back</div>
+          </div>
+        </div>
+      </button>
+      <div class="card-nav">
+        <button class="nav-btn" onclick="prevCard()">← Prev</button>
+        <button class="nav-btn" onclick="flipCard()">Flip</button>
+        <button class="nav-btn" onclick="nextCard()">Next →</button>
+      </div>
+      <button class="nav-btn" onclick="shuffleCards()" style="font-size:13px">⟳ Shuffle</button>
+    </div>
+  </div>
+
+  <!-- LEARN -->
+  <div id="tab-learn" class="hidden">
+    <div class="learn-stats">
+      <div class="stat-box"><div class="stat-num green" id="learn-correct">0</div><div class="stat-label">Correct</div></div>
+      <div class="stat-box"><div class="stat-num red" id="learn-wrong">0</div><div class="stat-label">Wrong</div></div>
+      <div class="stat-box"><div class="stat-num yellow" id="learn-due">0</div><div class="stat-label">Due</div></div>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:8px">
+      <div class="filter-panel" style="max-width:560px;width:100%;margin-bottom:0">
+        <div class="filter-groups">
+          <div>
+            <div class="filter-group-label">Word Types</div>
+            <div class="filter-chips" id="learn-type-chips"></div>
+          </div>
+          <div>
+            <div class="filter-group-label">Noun Subcategories</div>
+            <div class="filter-chips" id="learn-noun-chips"></div>
+          </div>
+        </div>
+        <div class="display-options">
+          <span style="font-size:11px;color:var(--text3);align-self:center">Question shows:</span>
+          <button class="toggle-btn on" id="learn-toggle-char" onclick="toggleLearnDisplay('char')">漢字</button>
+          <button class="toggle-btn on" id="learn-toggle-rom" onclick="toggleLearnDisplay('rom')">Romanisation</button>
+          <button class="toggle-btn on" id="learn-toggle-meaning" onclick="toggleLearnDisplay('meaning')">Meaning</button>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div style="display:flex;justify-content:center">
+    <div class="learn-card" id="learn-card">
+      <div class="learn-prompt" id="learn-prompt">What does this mean?</div>
+      <div class="learn-question" id="learn-question"></div>
+      <div id="learn-hint"></div>
+      <div class="learn-options" id="learn-options"></div>
+      <div class="learn-feedback hidden" id="learn-feedback"></div>
+      <button class="nav-btn primary hidden" id="learn-next" onclick="nextLearnCard()">Next →</button>
+    </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="tab-progress" class="hidden">
+    <div class="progress-section">
+      <div class="progress-overview">
+        <div class="overview-card"><div class="overview-num mastered-num" id="prog-mastered">0</div><div class="overview-label">✓ Mastered</div></div>
+        <div class="overview-card"><div class="overview-num learning-num" id="prog-learning">0</div><div class="overview-label">⟳ Learning</div></div>
+        <div class="overview-card"><div class="overview-num unseen-num" id="prog-unseen">0</div><div class="overview-label">○ Unseen</div></div>
+      </div>
+      <div style="max-width:560px;margin:0 auto;width:100%">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:var(--text3)">Overall mastery</span>
+            <span style="font-size:13px;font-weight:600;color:var(--accent)" id="prog-pct">0%</span>
+          </div>
+          <div style="height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;">
+            <div id="prog-bar" style="height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));border-radius:4px;transition:width 0.5s ease;width:0%"></div>
+          </div>
+        </div>
+        <div style="text-align:right;margin-bottom:14px;">
+          <button class="nav-btn danger" style="font-size:12px;padding:7px 14px;min-height:36px;" onclick="confirmResetAll()">Reset all progress</button>
+        </div>
+        <div class="progress-list-header" style="flex-wrap:wrap;gap:8px;">
+          <div class="progress-list-title">Word Progress</div>
+          <div class="progress-filter-btns" style="flex-wrap:wrap;gap:5px;">
+            <button class="pfbtn active" id="pf-all" onclick="setProgressFilter('all')">All</button>
+            <button class="pfbtn" id="pf-mastered" onclick="setProgressFilter('mastered')">Mastered</button>
+            <button class="pfbtn" id="pf-learning" onclick="setProgressFilter('learning')">Learning</button>
+            <button class="pfbtn" id="pf-unseen" onclick="setProgressFilter('unseen')">Unseen</button>
+          </div>
+        </div>
+        <div class="filter-panel" style="margin-bottom:10px;padding:10px 12px;">
+          <div class="filter-group-label" style="margin-bottom:6px;">Filter by Category</div>
+          <div class="filter-chips" id="progress-cat-chips"></div>
+        </div>
+        <div id="progress-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SANDHI -->
+  <div id="tab-sandhi" class="hidden">
+    <div class="sandhi-section">
+      <div class="sandhi-rules">
+        <button class="rules-title" onclick="toggleRules()" type="button">
+          📖 Tone Sandhi Rules <span id="rules-arrow">▼</span>
+        </button>
+        <div id="rules-content">
+          <div class="rules-grid">
+            <div class="rule-item"><div><span class="rule-tone">Tone 1</span><span class="rule-arrow">→</span><span class="rule-result">Tone 7</span></div><div class="rule-name">High flat → Low flat</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 2</span><span class="rule-arrow">→</span><span class="rule-result">Tone 1</span></div><div class="rule-name">Falling → High flat</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 3</span><span class="rule-arrow">→</span><span class="rule-result">Tone 2</span></div><div class="rule-name">Low falling → Low rising</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 4</span><span class="rule-arrow">→</span><span class="rule-result">Tone 8</span></div><div class="rule-name">Short stop → High stop</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 5</span><span class="rule-arrow">→</span><span class="rule-result">Tone 7</span></div><div class="rule-name">Down-up → Low flat</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 7</span><span class="rule-arrow">→</span><span class="rule-result">Tone 3</span></div><div class="rule-name">Low flat → Low falling</div></div>
+            <div class="rule-item"><div><span class="rule-tone">Tone 8</span><span class="rule-arrow">→</span><span class="rule-result">Tone 4</span></div><div class="rule-name">High stop → Short stop</div></div>
+          </div>
+          <div style="margin-top:9px;font-size:11px;color:var(--text3);line-height:1.6"><strong style="color:var(--text2)">Rule:</strong> All syllables <em>except the last</em> in a word undergo sandhi. The final syllable keeps its citation tone.</div>
+        </div>
+      </div>
+
+      <!-- MODE SWITCHER -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+        <div class="sandhi-mode-tabs">
+          <button class="sandhi-mode-btn active" id="smode-practice" onclick="setSandhiMode('practice')">📝 Practice</button>
+          <button class="sandhi-mode-btn" id="smode-blitz" onclick="setSandhiMode('blitz')">⚡ 1-Min Blitz</button>
+        </div>
+      </div>
+
+      <!-- PRACTICE MODE -->
+      <div id="sandhi-practice-section" style="display:flex;justify-content:center">
+      <div class="sandhi-practice-card">
+        <div class="sandhi-options-bar">
+          <button class="toggle-btn on" id="sandhi-show-char" onclick="toggleSandhiChar()">漢字</button>
+          <button class="toggle-btn on" id="sandhi-show-rom" onclick="toggleSandhiRom()">Romanisation</button>
+          <span style="font-size:11px;color:var(--text3)">Keys 1–8 to answer</span>
+        </div>
+        <div class="sandhi-word-display" id="sandhi-display"></div>
+        <div class="sandhi-input-area">
+          <div class="sandhi-question" id="sandhi-question"></div>
+          <div class="tone-buttons" id="sandhi-tone-buttons">
+            <button class="tone-btn" onclick="selectTone(1)" data-tone="1"><span class="tone-key">1</span> High Flat<br><small style="color:var(--text3)">a</small></button>
+            <button class="tone-btn" onclick="selectTone(2)" data-tone="2"><span class="tone-key">2</span> Falling<br><small style="color:var(--text3)">á</small></button>
+            <button class="tone-btn" onclick="selectTone(3)" data-tone="3"><span class="tone-key">3</span> Low Fall<br><small style="color:var(--text3)">à</small></button>
+            <button class="tone-btn" onclick="selectTone(4)" data-tone="4"><span class="tone-key">4</span> Stop<br><small style="color:var(--text3)">ah/ak</small></button>
+            <button class="tone-btn" onclick="selectTone(5)" data-tone="5"><span class="tone-key">5</span> Down-Up<br><small style="color:var(--text3)">â</small></button>
+            <button class="tone-btn" onclick="selectTone(7)" data-tone="7"><span class="tone-key">7</span> Low Flat<br><small style="color:var(--text3)">ā</small></button>
+            <button class="tone-btn" onclick="selectTone(8)" data-tone="8"><span class="tone-key">8</span> Hi Stop<br><small style="color:var(--text3)">a̍h</small></button>
+            <button class="tone-btn" onclick="selectTone(0)" data-tone="0"><span class="tone-key">0</span> No change<br><small style="color:var(--text3)">final syl.</small></button>
+          </div>
+          <div style="display:flex;gap:9px;justify-content:center">
+            <button class="sandhi-submit" id="sandhi-submit" onclick="submitSandhi()" disabled>Check</button>
+            <button class="nav-btn" onclick="nextSandhi()">Skip →</button>
+          </div>
+          <div class="sandhi-feedback hidden" id="sandhi-feedback"></div>
+          <button class="nav-btn primary hidden" id="sandhi-next-btn" onclick="nextSandhi()">Next →</button>
+        </div>
+        <div style="display:flex;gap:14px">
+          <div class="stat-box"><div class="stat-num green" id="sandhi-correct">0</div><div class="stat-label">Correct</div></div>
+          <div class="stat-box"><div class="stat-num red" id="sandhi-wrong">0</div><div class="stat-label">Wrong</div></div>
+        </div>
+      </div>
+      </div>
+
+      <!-- BLITZ MODE -->
+      <div id="sandhi-blitz-section" class="hidden" style="display:flex;justify-content:center">
+
+        <!-- PRE-GAME SCREEN -->
+        <div id="blitz-pregame" class="blitz-card">
+          <div class="learn-prompt">⚡ 1-Minute Blitz</div>
+          <div style="font-size:14px;color:var(--text2);text-align:center;line-height:1.6">Answer as many tone sandhi questions as you can in 60 seconds.<br>Use keyboard keys <strong style="color:var(--accent)">1–8</strong> or tap the buttons. No confirm needed — your first tap locks in.</div>
+          <div class="blitz-key-hint">
+            <div class="bkh"><kbd>1</kbd>High Flat</div>
+            <div class="bkh"><kbd>2</kbd>Falling</div>
+            <div class="bkh"><kbd>3</kbd>Low Fall</div>
+            <div class="bkh"><kbd>4</kbd>Stop</div>
+            <div class="bkh"><kbd>5</kbd>Down-Up</div>
+            <div class="bkh"><kbd>7</kbd>Low Flat</div>
+            <div class="bkh"><kbd>8</kbd>Hi Stop</div>
+            <div class="bkh"><kbd>0</kbd>No change</div>
+          </div>
+          <div class="sandhi-options-bar">
+            <button class="toggle-btn on" id="blitz-show-char" onclick="toggleBlitzChar()">漢字</button>
+            <button class="toggle-btn on" id="blitz-show-rom" onclick="toggleBlitzRom()">Romanisation</button>
+          </div>
+          <button class="sandhi-submit" style="font-size:16px;padding:14px 40px;" onclick="startBlitz()">Start ⚡</button>
+        </div>
+
+        <!-- IN-GAME SCREEN -->
+        <div id="blitz-game" class="blitz-card hidden">
+          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;">
+            <div class="blitz-time-num" id="blitz-time">60</div>
+            <div class="blitz-score-row">
+              <span style="font-size:13px;color:var(--green);font-weight:600" id="blitz-correct-live">0✓</span>
+              <span style="font-size:13px;color:var(--red);font-weight:600;margin-left:10px" id="blitz-wrong-live">0✗</span>
+            </div>
+          </div>
+          <div class="blitz-timer-wrap"><div class="blitz-timer-bar" id="blitz-bar"></div></div>
+          <div id="blitz-word-display" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;"></div>
+          <div class="blitz-question" id="blitz-question"></div>
+          <div class="tone-buttons" id="blitz-tone-buttons">
+            <button class="tone-btn" onclick="blitzAnswer(1)" data-tone="1"><span class="tone-key">1</span> High Flat<br><small style="color:var(--text3)">a</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(2)" data-tone="2"><span class="tone-key">2</span> Falling<br><small style="color:var(--text3)">á</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(3)" data-tone="3"><span class="tone-key">3</span> Low Fall<br><small style="color:var(--text3)">à</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(4)" data-tone="4"><span class="tone-key">4</span> Stop<br><small style="color:var(--text3)">ah/ak</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(5)" data-tone="5"><span class="tone-key">5</span> Down-Up<br><small style="color:var(--text3)">â</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(7)" data-tone="7"><span class="tone-key">7</span> Low Flat<br><small style="color:var(--text3)">ā</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(8)" data-tone="8"><span class="tone-key">8</span> Hi Stop<br><small style="color:var(--text3)">a̍h</small></button>
+            <button class="tone-btn" onclick="blitzAnswer(0)" data-tone="0"><span class="tone-key">0</span> No change<br><small style="color:var(--text3)">final syl.</small></button>
+          </div>
+        </div>
+
+        <!-- RESULT SCREEN -->
+        <div id="blitz-result" class="blitz-result hidden">
+          <div style="font-size:18px;font-weight:600;color:var(--text)">Time's up! ⚡</div>
+          <div class="blitz-result-score" id="blitz-final-score">0</div>
+          <div class="blitz-result-label">correct answers</div>
+          <div class="blitz-result-breakdown">
+            <span style="color:var(--green);font-weight:600" id="blitz-res-correct">0✓</span>
+            <span style="color:var(--red);font-weight:600" id="blitz-res-wrong">0✗</span>
+            <span style="color:var(--text3)" id="blitz-res-acc">0% accuracy</span>
+          </div>
+          <div id="blitz-hs" style="font-size:13px;color:var(--accent);"></div>
+          <button class="sandhi-submit" onclick="startBlitz()">Play Again ⚡</button>
+          <button class="nav-btn" onclick="setSandhiMode('blitz')">Back</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="blitz-flash" id="blitz-flash"></div>
+
+  <!-- BROWSE -->
+  <div id="tab-browse" class="hidden">
+    <button class="add-vocab-btn" onclick="openAddModal()">＋ Add custom vocabulary</button>
+    <div class="filter-panel">
+      <div class="filter-chips" id="browse-chips"></div>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active" onclick="setBrowseView('grid')" id="view-grid">Grid</button>
+      <button class="view-btn" onclick="setBrowseView('list')" id="view-list">List</button>
+    </div>
+    <div class="word-grid" id="browse-grid"></div>
+  </div>
+
+</div>
+
+<!-- ADD VOCAB MODAL -->
+<div class="modal-overlay hidden" id="add-modal" onclick="closeAddModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Add Custom Vocabulary</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">漢字 Character *</label>
+        <input class="form-input" id="add-char" placeholder="e.g. 冰淇淋" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Romanisation *</label>
+        <input class="form-input" id="add-rom" placeholder="e.g. ping-ki-lîm" maxlength="60">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Meaning (English) *</label>
+      <input class="form-input" id="add-meaning" placeholder="e.g. ice cream" maxlength="80">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Chinese / notes (optional)</label>
+      <input class="form-input" id="add-zh" placeholder="e.g. 冰淇淋" maxlength="60">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Word Type *</label>
+        <select class="form-select" id="add-type">
+          <option value="noun">Noun</option>
+          <option value="verb">Verb</option>
+          <option value="adj">Adjective</option>
+          <option value="adv">Adverb</option>
+          <option value="particle">Particle</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="add-sub">
+          <option value="custom">Custom</option>
+          <option value="people">People & Family</option>
+          <option value="body">Body</option>
+          <option value="animals">Animals</option>
+          <option value="food">Food & Drink</option>
+          <option value="places">Places</option>
+          <option value="time">Time</option>
+          <option value="objects">Objects</option>
+          <option value="nature">Nature</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Example sentence (optional)</label>
+      <input class="form-input" id="add-example" placeholder="e.g. 食冰淇淋 (tsi̍h ping-ki-lîm) — eat ice cream" maxlength="120">
+    </div>
+    <div id="add-error" style="color:var(--red);font-size:12px;margin-top:-8px;display:none"></div>
+    <div class="modal-actions">
+      <button class="nav-btn" onclick="closeAddModal()">Cancel</button>
+      <button class="nav-btn primary" onclick="saveCustomWord()">Add Word</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// BUILT-IN VOCABULARY
+// ============================================================
+const BUILTIN_WORDS = [
+  {char:'阿公',rom:'a-kong',meaning:'grandfather (paternal)',zh:'爺爺/阿公',type:'noun',sub:'people',hsk:true,examples:['阿公佮阿媽 (a-kong kah a-má) — grandpa and grandma']},
+  {char:'阿媽',rom:'a-má',meaning:'grandmother (paternal)',zh:'奶奶/阿媽',type:'noun',sub:'people',hsk:true},
+  {char:'阿爸',rom:'a-pa',meaning:'dad, father',zh:'爸爸',type:'noun',sub:'people',hsk:true,examples:['阿爸佮阿母 — dad and mum']},
+  {char:'阿母',rom:'a-bú',meaning:'mum, mother',zh:'媽媽',type:'noun',sub:'people',hsk:true},
+  {char:'阿兄',rom:'a-hiann',meaning:'older brother',zh:'哥哥',type:'noun',sub:'people',hsk:true},
+  {char:'阿嫂',rom:'a-só',meaning:'sister-in-law (brother\'s wife)',zh:'嫂嫂',type:'noun',sub:'people',hsk:false},
+  {char:'阿伯',rom:'a-peh',meaning:'uncle (father\'s older brother)',zh:'伯伯',type:'noun',sub:'people',hsk:true},
+  {char:'阿舅',rom:'a-kū',meaning:'uncle (mother\'s brother)',zh:'舅舅',type:'noun',sub:'people',hsk:false},
+  {char:'阿叔',rom:'a-tsik',meaning:'uncle (father\'s younger brother)',zh:'叔叔',type:'noun',sub:'people',hsk:true},
+  {char:'阿姑',rom:'a-koo',meaning:'aunt (father\'s sister)',zh:'姑姑',type:'noun',sub:'people',hsk:true},
+  {char:'阿姊',rom:'a-tsí',meaning:'older sister',zh:'姊姊',type:'noun',sub:'people',hsk:true},
+  {char:'阿姨',rom:'a-î',meaning:'aunt (mother\'s sister)',zh:'阿姨',type:'noun',sub:'people',hsk:true},
+  {char:'阿祖',rom:'a-tsóo',meaning:'great-grandparent',zh:'曾祖父/母',type:'noun',sub:'people',hsk:false},
+  {char:'囡仔',rom:'gín-á',meaning:'child, kid',zh:'孩子',type:'noun',sub:'people',hsk:true,examples:['查某囡仔 (tsa-bóo gín-á) — girl']},
+  {char:'查某',rom:'tsa-bóo',meaning:'woman, female',zh:'女人',type:'noun',sub:'people',hsk:true},
+  {char:'查埔',rom:'tsa-poo',meaning:'man, male',zh:'男人',type:'noun',sub:'people',hsk:true},
+  {char:'人',rom:'lâng',meaning:'person, people',zh:'人',type:'noun',sub:'people',hsk:true,examples:['人客 (lâng-kheh) — guest/customer']},
+  {char:'人客',rom:'lâng-kheh',meaning:'guest, customer',zh:'客人',type:'noun',sub:'people',hsk:true},
+  {char:'翁',rom:'ang',meaning:'husband',zh:'丈夫',type:'noun',sub:'people',hsk:true},
+  {char:'翁仔某',rom:'ang-á-bóo',meaning:'husband and wife, couple',zh:'夫妻',type:'noun',sub:'people',hsk:false},
+  {char:'爸',rom:'pē',meaning:'father, dad',zh:'爸',type:'noun',sub:'people',hsk:true},
+  {char:'序大',rom:'sī-tuā',meaning:'elder, senior person',zh:'長輩',type:'noun',sub:'people',hsk:false},
+  {char:'少年家',rom:'siàu-liân-ke',meaning:'young person',zh:'年輕人',type:'noun',sub:'people',hsk:true},
+  {char:'頷頸',rom:'ām-kún',meaning:'neck',zh:'脖子',type:'noun',sub:'body',hsk:true},
+  {char:'目',rom:'bák',meaning:'eye',zh:'眼睛',type:'noun',sub:'body',hsk:true,examples:['目睭 (bák-tsiu) — eye','目屎 (bák-sái) — tears']},
+  {char:'面',rom:'bīn',meaning:'face',zh:'臉',type:'noun',sub:'body',hsk:true},
+  {char:'鼻',rom:'phīnn',meaning:'nose',zh:'鼻子',type:'noun',sub:'body',hsk:true},
+  {char:'嚨喉',rom:'nâ-âu',meaning:'throat',zh:'喉嚨',type:'noun',sub:'body',hsk:true},
+  {char:'跤',rom:'kha',meaning:'foot, leg, bottom of',zh:'腳',type:'noun',sub:'body',hsk:true},
+  {char:'尻川',rom:'kha-tshng',meaning:'buttocks, rear',zh:'屁股',type:'noun',sub:'body',hsk:false},
+  {char:'跤頭趺',rom:'kha-thâu-u',meaning:'knee',zh:'膝蓋',type:'noun',sub:'body',hsk:true},
+  {char:'頭',rom:'thâu',meaning:'head, top, first',zh:'頭',type:'noun',sub:'body',hsk:true,examples:['頭毛 (thâu-mng) — hair','頭殼 (thâu-khak) — skull']},
+  {char:'喙',rom:'tshuì',meaning:'mouth',zh:'嘴',type:'noun',sub:'body',hsk:true,examples:['喙齒 (tshuì-khí) — teeth']},
+  {char:'身軀',rom:'sin-khu',meaning:'body',zh:'身體',type:'noun',sub:'body',hsk:true},
+  {char:'奶',rom:'ling',meaning:'breast, milk',zh:'乳房/奶',type:'noun',sub:'body',hsk:false},
+  {char:'蠓',rom:'báng',meaning:'mosquito',zh:'蚊子',type:'noun',sub:'animals',hsk:false},
+  {char:'鳥鼠',rom:'niáu-tshí',meaning:'rat, mouse',zh:'老鼠',type:'noun',sub:'animals',hsk:true},
+  {char:'粉鳥',rom:'hún-tsiáu',meaning:'pigeon, dove',zh:'鴿子',type:'noun',sub:'animals',hsk:false},
+  {char:'蝶仔',rom:'ít-á',meaning:'butterfly',zh:'蝴蝶',type:'noun',sub:'animals',hsk:false},
+  {char:'草蜢仔',rom:'tsháu-meh-á',meaning:'grasshopper',zh:'蚱蜢',type:'noun',sub:'animals',hsk:false},
+  {char:'露螺',rom:'lōo-lê',meaning:'snail',zh:'蝸牛',type:'noun',sub:'animals',hsk:false},
+  {char:'蟮蟲仔',rom:'siān-thâng-á',meaning:'gecko, house lizard',zh:'壁虎',type:'noun',sub:'animals',hsk:false},
+  {char:'胡蠅',rom:'hôo-sîn',meaning:'fly (insect)',zh:'蒼蠅',type:'noun',sub:'animals',hsk:false},
+  {char:'蚵',rom:'ô',meaning:'oyster',zh:'蠔/牡蠣',type:'noun',sub:'animals',hsk:false,examples:['蚵仔煎 (ô-á-tsian) — oyster omelette']},
+  {char:'鰇魚',rom:'jiû-hî',meaning:'squid',zh:'魷魚',type:'noun',sub:'animals',hsk:false},
+  {char:'蜊仔',rom:'lâ-á',meaning:'freshwater clam',zh:'蜆',type:'noun',sub:'animals',hsk:false},
+  {char:'水雞',rom:'tsuí-ke',meaning:'frog',zh:'青蛙',type:'noun',sub:'animals',hsk:false},
+  {char:'螿蜍',rom:'tsiunn-tsî',meaning:'toad',zh:'蟾蜍',type:'noun',sub:'animals',hsk:false},
+  {char:'杜蚓',rom:'tōo-kún',meaning:'earthworm',zh:'蚯蚓',type:'noun',sub:'animals',hsk:false},
+  {char:'肚胿仔',rom:'tōo-kuai-á',meaning:'tadpole',zh:'蝌蚪',type:'noun',sub:'animals',hsk:false},
+  {char:'糜',rom:'muê',meaning:'rice porridge, congee',zh:'稀飯',type:'noun',sub:'food',hsk:true},
+  {char:'粿',rom:'kué',meaning:'rice cake (various types)',zh:'粿',type:'noun',sub:'food',hsk:false},
+  {char:'果子',rom:'kué-tsí',meaning:'fruit',zh:'水果',type:'noun',sub:'food',hsk:true},
+  {char:'弓蕉',rom:'king-tsio',meaning:'banana',zh:'香蕉',type:'noun',sub:'food',hsk:true},
+  {char:'芫荽',rom:'iân-sui',meaning:'cilantro, coriander',zh:'香菜',type:'noun',sub:'food',hsk:false},
+  {char:'菠薐仔',rom:'pue-lîng-á',meaning:'spinach',zh:'菠菜',type:'noun',sub:'food',hsk:true},
+  {char:'羹',rom:'kenn',meaning:'thick soup, gravy',zh:'羹',type:'noun',sub:'food',hsk:false},
+  {char:'糍',rom:'tsî',meaning:'mochi, glutinous rice cake',zh:'麻糬',type:'noun',sub:'food',hsk:false},
+  {char:'四秀仔',rom:'sì-siù-á',meaning:'snack, nibbles',zh:'零食',type:'noun',sub:'food',hsk:true},
+  {char:'枝仔冰',rom:'ki-á-ping',meaning:'popsicle, ice lolly',zh:'冰棒',type:'noun',sub:'food',hsk:false},
+  {char:'茶',rom:'tê',meaning:'tea',zh:'茶',type:'noun',sub:'food',hsk:true},
+  {char:'後壁',rom:'āu-piah',meaning:'back, behind',zh:'後面',type:'noun',sub:'places',hsk:true},
+  {char:'頭前',rom:'thâu-tsîng',meaning:'front, ahead',zh:'前面',type:'noun',sub:'places',hsk:true},
+  {char:'埕',rom:'tiânn',meaning:'courtyard, plaza',zh:'庭院',type:'noun',sub:'places',hsk:false},
+  {char:'亭仔跤',rom:'tîng-á-kha',meaning:'arcade, covered walkway',zh:'騎樓',type:'noun',sub:'places',hsk:false},
+  {char:'灶跤',rom:'tsàu-kha',meaning:'kitchen',zh:'廚房',type:'noun',sub:'places',hsk:true},
+  {char:'便所',rom:'piān-sóo',meaning:'toilet, restroom',zh:'廁所',type:'noun',sub:'places',hsk:true},
+  {char:'厝',rom:'tshù',meaning:'house, home',zh:'房子',type:'noun',sub:'places',hsk:true,examples:['厝內 (tshù-lāi) — inside','厝邊 (tshù-pinn) — neighbour']},
+  {char:'後日',rom:'āu--jit',meaning:'day after tomorrow',zh:'後天',type:'noun',sub:'time',hsk:true},
+  {char:'明仔載',rom:'bîn-á-tsài',meaning:'tomorrow',zh:'明天',type:'noun',sub:'time',hsk:true},
+  {char:'昨昏',rom:'tsa-hng',meaning:'yesterday',zh:'昨天',type:'noun',sub:'time',hsk:true},
+  {char:'中晝',rom:'tiong-tàu',meaning:'noon, midday, lunch',zh:'中午',type:'noun',sub:'time',hsk:true},
+  {char:'下晡',rom:'ē-poo',meaning:'afternoon',zh:'下午',type:'noun',sub:'time',hsk:true},
+  {char:'透早',rom:'thàu-tsá',meaning:'early morning, dawn',zh:'清晨',type:'noun',sub:'time',hsk:true},
+  {char:'暝',rom:'mê',meaning:'night, evening',zh:'夜晚',type:'noun',sub:'time',hsk:true},
+  {char:'日',rom:'jit',meaning:'sun, day',zh:'太陽/日',type:'noun',sub:'time',hsk:true,examples:['日頭 (jit-thâu) — sun']},
+  {char:'冬',rom:'tang',meaning:'year, harvest season',zh:'年/冬',type:'noun',sub:'time',hsk:true},
+  {char:'鉸刀',rom:'ka-to',meaning:'scissors',zh:'剪刀',type:'noun',sub:'objects',hsk:true},
+  {char:'鎖匙',rom:'só-sî',meaning:'key',zh:'鑰匙',type:'noun',sub:'objects',hsk:true},
+  {char:'目鏡',rom:'bák-kiànn',meaning:'glasses, spectacles',zh:'眼鏡',type:'noun',sub:'objects',hsk:true},
+  {char:'冊',rom:'tsheh',meaning:'book',zh:'書',type:'noun',sub:'objects',hsk:true},
+  {char:'衫',rom:'sann',meaning:'clothes, shirt',zh:'衣服',type:'noun',sub:'objects',hsk:true},
+  {char:'箸',rom:'tī',meaning:'chopsticks',zh:'筷子',type:'noun',sub:'objects',hsk:true},
+  {char:'車',rom:'tshia',meaning:'vehicle, car',zh:'車',type:'noun',sub:'objects',hsk:true},
+  {char:'糞埽',rom:'pùn-sò',meaning:'rubbish, garbage',zh:'垃圾',type:'noun',sub:'objects',hsk:false},
+  {char:'手電',rom:'tshiú-tiān',meaning:'torch, flashlight',zh:'手電筒',type:'noun',sub:'objects',hsk:false},
+  {char:'頭路',rom:'thâu-lōo',meaning:'job, occupation',zh:'工作/職業',type:'noun',sub:'objects',hsk:true},
+  {char:'法度',rom:'huat-tōo',meaning:'method, way, means',zh:'辦法',type:'noun',sub:'objects',hsk:true,examples:['無法度 — no way']},
+  {char:'風颱',rom:'hong-thai',meaning:'typhoon',zh:'颱風',type:'noun',sub:'nature',hsk:false},
+  {char:'海湧',rom:'hái-íng',meaning:'ocean wave',zh:'海浪',type:'noun',sub:'nature',hsk:false},
+  {char:'月娘',rom:'guh-niû',meaning:'the moon',zh:'月亮',type:'noun',sub:'nature',hsk:true},
+  {char:'爍爁',rom:'sih-nah',meaning:'lightning',zh:'閃電',type:'noun',sub:'nature',hsk:false},
+  {char:'愛',rom:'ài',meaning:'to love; to want; to like',zh:'喜歡/愛',type:'verb',sub:'verb',hsk:true,examples:['愛睏 (ài-khùn) — sleepy']},
+  {char:'沃',rom:'ak',meaning:'to water (plants); to pour on',zh:'澆/淋',type:'verb',sub:'verb',hsk:false},
+  {char:'挽',rom:'bán',meaning:'to pick, pluck, harvest',zh:'摘/採',type:'verb',sub:'verb',hsk:true},
+  {char:'覕',rom:'bih',meaning:'to hide',zh:'躲藏',type:'verb',sub:'verb',hsk:false},
+  {char:'捌',rom:'bat',meaning:'to know, recognise; to have done before',zh:'認識/曾經',type:'verb',sub:'verb',hsk:true},
+  {char:'欲',rom:'beh',meaning:'to want, will, about to',zh:'要/快要',type:'verb',sub:'verb',hsk:true},
+  {char:'無',rom:'bô',meaning:'to not have; no; without',zh:'無/沒有',type:'verb',sub:'verb',hsk:true,examples:['無閒 (bô-îng) — busy']},
+  {char:'夯',rom:'giâ',meaning:'to carry (on shoulder)',zh:'扛',type:'verb',sub:'verb',hsk:false},
+  {char:'攑',rom:'gia̍h',meaning:'to lift, raise, hold up',zh:'舉起/拿',type:'verb',sub:'verb',hsk:true,examples:['攑手 — raise hand']},
+  {char:'下',rom:'hē',meaning:'to put down, place',zh:'放',type:'verb',sub:'verb',hsk:true},
+  {char:'掀',rom:'hian',meaning:'to flip open, turn over',zh:'掀/翻',type:'verb',sub:'verb',hsk:false},
+  {char:'燃',rom:'hiânn',meaning:'to burn, light a fire',zh:'燃燒',type:'verb',sub:'verb',hsk:false},
+  {char:'翕',rom:'hip',meaning:'to photograph, take a photo',zh:'拍照',type:'verb',sub:'verb',hsk:true},
+  {char:'予',rom:'hōo',meaning:'to give; (passive marker) by',zh:'給/被',type:'verb',sub:'verb',hsk:true},
+  {char:'共',rom:'kā',meaning:'to do to; with; for (coverb)',zh:'把/對/給',type:'verb',sub:'verb',hsk:true},
+  {char:'講',rom:'kóng',meaning:'to speak, say, talk',zh:'說/講',type:'verb',sub:'verb',hsk:true,examples:['講古 — tell stories']},
+  {char:'看',rom:'khuànn',meaning:'to look, watch, see',zh:'看',type:'verb',sub:'verb',hsk:true},
+  {char:'睏',rom:'khùn',meaning:'to sleep, rest',zh:'睡覺',type:'verb',sub:'verb',hsk:true},
+  {char:'行',rom:'kiânn',meaning:'to walk, travel, navigate',zh:'走路/行走',type:'verb',sub:'verb',hsk:true},
+  {char:'驚',rom:'kiann',meaning:'to be afraid, fear',zh:'害怕',type:'verb',sub:'verb',hsk:true},
+  {char:'揀',rom:'kíng',meaning:'to choose, select, sort',zh:'挑選',type:'verb',sub:'verb',hsk:true},
+  {char:'啉',rom:'lim',meaning:'to drink',zh:'喝',type:'verb',sub:'verb',hsk:true,examples:['啉水 — drink water']},
+  {char:'落雨',rom:'loh-hōo',meaning:'to rain',zh:'下雨',type:'verb',sub:'verb',hsk:true},
+  {char:'食',rom:'tsi̍h',meaning:'to eat, drink',zh:'吃/喝',type:'verb',sub:'verb',hsk:true,examples:['食飯 — eat rice/meal']},
+  {char:'坐',rom:'tsē',meaning:'to sit',zh:'坐',type:'verb',sub:'verb',hsk:true},
+  {char:'走',rom:'tsáu',meaning:'to run, flee',zh:'跑/逃',type:'verb',sub:'verb',hsk:true},
+  {char:'洗',rom:'sé',meaning:'to wash',zh:'洗',type:'verb',sub:'verb',hsk:true},
+  {char:'買',rom:'bé',meaning:'to buy',zh:'買',type:'verb',sub:'verb',hsk:true},
+  {char:'徛',rom:'khiā',meaning:'to stand, reside',zh:'站/住',type:'verb',sub:'verb',hsk:true},
+  {char:'拍',rom:'phah',meaning:'to hit, make, do',zh:'打/製造',type:'verb',sub:'verb',hsk:true,examples:['拍拚 (phah-piànn) — work hard']},
+  {char:'掠',rom:'li̍h',meaning:'to catch, grab',zh:'抓',type:'verb',sub:'verb',hsk:true},
+  {char:'趁',rom:'thàn',meaning:'to earn (money)',zh:'賺',type:'verb',sub:'verb',hsk:true},
+  {char:'揣',rom:'tshuē',meaning:'to look for, search',zh:'找',type:'verb',sub:'verb',hsk:true},
+  {char:'呵咾',rom:'o-ló',meaning:'to praise, compliment',zh:'稱讚',type:'verb',sub:'verb',hsk:true},
+  {char:'知',rom:'tsai',meaning:'to know',zh:'知道',type:'verb',sub:'verb',hsk:true,examples:['知影 (tsai-iánn) — be aware']},
+  {char:'炊',rom:'tshue',meaning:'to steam (food)',zh:'蒸',type:'verb',sub:'verb',hsk:false},
+  {char:'轉',rom:'tńg',meaning:'to return, turn, rotate',zh:'回/轉',type:'verb',sub:'verb',hsk:true,examples:['轉去 — go back']},
+  {char:'煮',rom:'tsí',meaning:'to cook, boil',zh:'煮',type:'verb',sub:'verb',hsk:true},
+  {char:'歇',rom:'hioh',meaning:'to rest, take a break',zh:'休息',type:'verb',sub:'verb',hsk:true},
+  {char:'䆀',rom:'bái',meaning:'bad, ugly',zh:'不好/醜',type:'adj',sub:'adj',hsk:true},
+  {char:'𠢕',rom:'gâu',meaning:'skilled, capable, often',zh:'很會/擅長',type:'adj',sub:'adj',hsk:true},
+  {char:'戇',rom:'gōng',meaning:'foolish, silly, dumb',zh:'傻',type:'adj',sub:'adj',hsk:false},
+  {char:'好勢',rom:'hó-sè',meaning:'proper, settled, ready',zh:'妥當',type:'adj',sub:'adj',hsk:true},
+  {char:'懸',rom:'kuân',meaning:'high, tall',zh:'高',type:'adj',sub:'adj',hsk:true},
+  {char:'寒',rom:'kuânn',meaning:'cold, chilly',zh:'冷',type:'adj',sub:'adj',hsk:true},
+  {char:'熱',rom:'juh',meaning:'hot, summer',zh:'炎熱',type:'adj',sub:'adj',hsk:true},
+  {char:'乾',rom:'kuann',meaning:'dry',zh:'乾',type:'adj',sub:'adj',hsk:true},
+  {char:'澹',rom:'tâm',meaning:'wet, damp',zh:'濕',type:'adj',sub:'adj',hsk:true},
+  {char:'焦',rom:'ta',meaning:'dry (mouth/surface)',zh:'乾燥',type:'adj',sub:'adj',hsk:true},
+  {char:'鮮',rom:'tshinn',meaning:'fresh',zh:'新鮮',type:'adj',sub:'adj',hsk:true},
+  {char:'清氣',rom:'tshing-khì',meaning:'clean, tidy',zh:'乾淨',type:'adj',sub:'adj',hsk:true},
+  {char:'媠',rom:'suí',meaning:'beautiful, pretty',zh:'美麗',type:'adj',sub:'adj',hsk:true},
+  {char:'少年',rom:'siàu-liân',meaning:'young, youthful',zh:'年輕',type:'adj',sub:'adj',hsk:true},
+  {char:'古錐',rom:'kóo-tsui',meaning:'cute, adorable',zh:'可愛',type:'adj',sub:'adj',hsk:true},
+  {char:'緣投',rom:'iân-tâu',meaning:'handsome',zh:'英俊',type:'adj',sub:'adj',hsk:true},
+  {char:'骨力',rom:'kut-lit',meaning:'hardworking, diligent',zh:'勤勞',type:'adj',sub:'adj',hsk:true},
+  {char:'巧',rom:'khiáu',meaning:'clever, smart',zh:'聰明',type:'adj',sub:'adj',hsk:true},
+  {char:'僫',rom:'oh',meaning:'difficult, hard',zh:'困難',type:'adj',sub:'adj',hsk:true},
+  {char:'忝',rom:'thiám',meaning:'tired, exhausted',zh:'疲累',type:'adj',sub:'adj',hsk:true},
+  {char:'薟',rom:'hiam',meaning:'spicy, hot',zh:'辣',type:'adj',sub:'adj',hsk:true},
+  {char:'甘',rom:'kam',meaning:'sweet; willing',zh:'甘甜/捨得',type:'adj',sub:'adj',hsk:true},
+  {char:'枵',rom:'iau',meaning:'hungry',zh:'餓',type:'adj',sub:'adj',hsk:true},
+  {char:'烏',rom:'oo',meaning:'black, dark',zh:'黑',type:'adj',sub:'adj',hsk:true},
+  {char:'芳',rom:'phang',meaning:'fragrant, good-smelling',zh:'香',type:'adj',sub:'adj',hsk:true},
+  {char:'按呢',rom:'án-ne',meaning:'like this, this way, so',zh:'這樣/如此',type:'adv',sub:'adv',hsk:true},
+  {char:'傷',rom:'siunn',meaning:'too (excessive)',zh:'太',type:'adv',sub:'adv',hsk:true},
+  {char:'較',rom:'khah',meaning:'more, rather, comparatively',zh:'比較/更',type:'adv',sub:'adv',hsk:true},
+  {char:'誠',rom:'tsiânn',meaning:'very, truly, quite',zh:'很/非常',type:'adv',sub:'adv',hsk:true},
+  {char:'遐爾',rom:'hiah-nī',meaning:'so (much/many), that much',zh:'那麼',type:'adv',sub:'adv',hsk:true},
+  {char:'遮爾',rom:'tsiah-nī',meaning:'so (this much)',zh:'這麼',type:'adv',sub:'adv',hsk:true},
+  {char:'干焦',rom:'kan-na',meaning:'only, merely, just',zh:'僅只',type:'adv',sub:'adv',hsk:true},
+  {char:'閣',rom:'koh',meaning:'again, also, even more',zh:'再/還',type:'adv',sub:'adv',hsk:true},
+  {char:'連鞭',rom:'liâm-mi',meaning:'right away, immediately',zh:'馬上',type:'adv',sub:'adv',hsk:true},
+  {char:'隨',rom:'suî',meaning:'immediately, at once',zh:'馬上',type:'adv',sub:'adv',hsk:true},
+  {char:'雄雄',rom:'hiông-hiông',meaning:'suddenly, all of a sudden',zh:'突然',type:'adv',sub:'adv',hsk:true},
+  {char:'定定',rom:'tiānn-tiānn',meaning:'often, frequently',zh:'常常',type:'adv',sub:'adv',hsk:true},
+  {char:'刁工',rom:'thiau-kang',meaning:'on purpose, deliberately',zh:'故意/特地',type:'adv',sub:'adv',hsk:true},
+  {char:'猶',rom:'iáu',meaning:'still, yet',zh:'還/尚',type:'adv',sub:'adv',hsk:true},
+  {char:'愈',rom:'jú',meaning:'more and more, increasingly',zh:'愈/越',type:'adv',sub:'adv',hsk:true},
+  {char:'足',rom:'tsiok',meaning:'very, extremely (colloquial)',zh:'很/極',type:'adv',sub:'adv',hsk:true},
+  {char:'攏',rom:'lóng',meaning:'all, every, entirely',zh:'都/全部',type:'adv',sub:'adv',hsk:true},
+  {char:'今',rom:'tann',meaning:'now, at this moment',zh:'現在',type:'adv',sub:'adv',hsk:true},
+  {char:'緊',rom:'kín',meaning:'fast, quick, urgent',zh:'快/急',type:'adv',sub:'adv',hsk:true},
+  {char:'阿',rom:'a',meaning:'(prefix for names/family terms)',zh:'阿',type:'particle',sub:'particle',hsk:true},
+  {char:'仔',rom:'á',meaning:'(diminutive suffix)',zh:'仔/子',type:'particle',sub:'particle',hsk:false},
+  {char:'的',rom:'ê',meaning:'(possessive/attributive particle)',zh:'的',type:'particle',sub:'particle',hsk:true},
+  {char:'嘛',rom:'mā',meaning:'also, too (colloquial)',zh:'也',type:'particle',sub:'particle',hsk:true},
+  {char:'毋',rom:'m̄',meaning:'not (negation)',zh:'不',type:'particle',sub:'particle',hsk:true,examples:['毋是 — is not','毋通 — must not']},
+  {char:'莫',rom:'mài',meaning:'don\'t (negative imperative)',zh:'別/不要',type:'particle',sub:'particle',hsk:true},
+  {char:'若',rom:'nā',meaning:'if, supposing',zh:'若/如果',type:'particle',sub:'particle',hsk:true},
+  {char:'袂',rom:'bē',meaning:'cannot, won\'t, unable to',zh:'不/不能',type:'particle',sub:'particle',hsk:true},
+  {char:'會',rom:'ē',meaning:'can, will, able to',zh:'可以/會',type:'particle',sub:'particle',hsk:true},
+  {char:'通',rom:'thang',meaning:'may, can (permission)',zh:'可以',type:'particle',sub:'particle',hsk:true},
+  {char:'敢',rom:'kám',meaning:'dare to; is it? (question)',zh:'難道/是否',type:'particle',sub:'particle',hsk:true},
+  {char:'佇',rom:'tī',meaning:'at, in (location)',zh:'在',type:'particle',sub:'particle',hsk:true},
+  {char:'咧',rom:'leh',meaning:'(progressive/locative particle)',zh:'在/正在',type:'particle',sub:'particle',hsk:false},
+  {char:'著',rom:'ti̍h',meaning:'correct; must; (result complement)',zh:'對/必須',type:'particle',sub:'particle',hsk:true},
+  {char:'就',rom:'tō',meaning:'then, right away, exactly',zh:'就',type:'particle',sub:'particle',hsk:true},
+  {char:'抑是',rom:'i̍h-sī',meaning:'or, alternatively',zh:'或是/或者',type:'particle',sub:'particle',hsk:true},
+  {char:'佮',rom:'kah',meaning:'and, with, together with',zh:'和/與',type:'particle',sub:'particle',hsk:true},
+  {char:'佮意',rom:'kah-ì',meaning:'to like, fancy something',zh:'中意/喜歡',type:'particle',sub:'particle',hsk:true},
+  {char:'好佳哉',rom:'hó-ka-tsài',meaning:'fortunately, luckily',zh:'幸好',type:'particle',sub:'particle',hsk:true},
+];
+
+// ============================================================
+// STATE & STORAGE
+// ============================================================
+const STORAGE_KEY = 'tw_learn_scores';
+const CUSTOM_KEY  = 'tw_custom_words';
+
+let WORDS = [];
+let customWords = [];
+
+// learnScores: { wordKey -> {correct,wrong,interval,dueIn,seen} }
+let learnScores = {};
+let learnCorrect = 0, learnWrong = 0;
+let learnCurrentWord = null;
+let learnAnswered = false;
+let learnShow = {char:true, rom:true, meaning:true};
+let learnActiveTypes = new Set(['noun','verb','adj','adv','particle']);
+let learnActiveNounSubs = new Set(['people','body','animals','food','places','time','objects','nature','custom']);
+
+let activeTypes = new Set(['noun','verb','adj','adv','particle']);
+let activeNounSubs = new Set(['people','body','animals','food','places','time','objects','nature','custom']);
+let displayShow = {char:true, rom:true, meaning:true};
+let filteredWords = [];
+let currentCardIndex = 0;
+let cardFlipped = false;
+
+let sandhiWords=[], sandhiIndex=0, sandhiCorrect=0, sandhiWrong=0;
+let selectedTone=null, sandhiAnswered=false;
+
+let browseFilter='all', browseView='grid';
+let progressFilter='all';
+
+const TYPE_LABELS = {noun:'Nouns',verb:'Verbs',adj:'Adjectives',adv:'Adverbs',particle:'Particles'};
+const SUB_LABELS = {people:'People & Family',body:'Body',animals:'Animals',food:'Food & Drink',places:'Places',time:'Time',objects:'Objects & Things',nature:'Nature & Weather',custom:'My Custom Words',adj:'Adjectives',verb:'Verbs',adv:'Adverbs',particle:'Particles'};
+
+// Word key for storage (stable)
+function wordKey(w) { return (w.custom ? 'c:' : 'b:') + w.char + ':' + w.rom; }
+
+// ============================================================
+// ============================================================
+
+
+// ============================================================
+// LOAD / SAVE
+// ============================================================
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) learnScores = JSON.parse(raw);
+  } catch(e) { learnScores = {}; }
+  try {
+    const raw = localStorage.getItem(CUSTOM_KEY);
+    if (raw) customWords = JSON.parse(raw);
+  } catch(e) { customWords = []; }
+}
+function saveScores() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(learnScores)); } catch(e){}
+}
+function saveCustomWords() {
+  try { localStorage.setItem(CUSTOM_KEY, JSON.stringify(customWords)); } catch(e){}
+}
+function ensureScore(w) {
+  const k = wordKey(w);
+  if (!learnScores[k]) learnScores[k] = {correct:0, wrong:0, interval:1, dueIn:0, seen:false};
+  return learnScores[k];
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadStorage();
+  rebuildWords();
+  buildTypeChips();
+  buildNounChips();
+  buildLearnTypeChips();
+  buildLearnNounChips();
+  buildBrowseChips();
+  buildProgressCatChips();
+  applyFilters();
+  initSandhi();
+  renderBrowse();
+  nextLearnCard();
+  renderProgress();
+  document.getElementById('word-count').textContent = WORDS.length;
+}
+
+function rebuildWords() {
+  WORDS = [...BUILTIN_WORDS, ...customWords.map(w=>({...w,custom:true}))];
+  WORDS.forEach(ensureScore);
+}
+
+function showTab(name) {
+  ['flashcards','learn','progress','sandhi','browse'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('hidden', t!==name);
+  });
+  document.querySelectorAll('.tab').forEach((b,i)=>{
+    b.classList.toggle('active', ['flashcards','learn','progress','sandhi','browse'][i]===name);
+  });
+  if(name==='learn') nextLearnCard();
+  if(name==='sandhi'){setSandhiMode('practice');}
+  if(name==='progress') renderProgress();
+}
+
+// ============================================================
+// FILTERS & CHIPS
+// ============================================================
+function buildTypeChips() {
+  const c = document.getElementById('type-chips');
+  c.innerHTML = '';
+  Object.entries(TYPE_LABELS).forEach(([k,v])=>{
+    const el = document.createElement('button');
+    el.className='chip cat-'+k+' active';
+    el.textContent=v;
+    el.onclick=()=>toggleType(k,el);
+    c.appendChild(el);
+  });
+}
+function buildLearnTypeChips() {
+  const c = document.getElementById('learn-type-chips');
+  if(!c) return;
+  c.innerHTML = '';
+  Object.entries(TYPE_LABELS).forEach(([k,v])=>{
+    const el = document.createElement('button');
+    el.className='chip cat-'+k+' active';
+    el.textContent=v;
+    el.onclick=()=>toggleLearnType(k,el);
+    c.appendChild(el);
+  });
+}
+function buildLearnNounChips() {
+  const c = document.getElementById('learn-noun-chips');
+  if(!c) return;
+  c.innerHTML = '';
+  const subs = ['people','body','animals','food','places','time','objects','nature'];
+  if(customWords.length) subs.push('custom');
+  subs.forEach(k=>{
+    const el=document.createElement('button');
+    el.className='chip cat-noun active';
+    el.textContent=SUB_LABELS[k]||k;
+    el.onclick=()=>toggleLearnNounSub(k,el);
+    c.appendChild(el);
+  });
+}
+function toggleLearnType(k,el){
+  if(learnActiveTypes.has(k))learnActiveTypes.delete(k);else learnActiveTypes.add(k);
+  el.classList.toggle('active');
+}
+function toggleLearnNounSub(k,el){
+  if(learnActiveNounSubs.has(k))learnActiveNounSubs.delete(k);else learnActiveNounSubs.add(k);
+  el.classList.toggle('active');
+}
+function getLearnPool(){
+  return WORDS.filter(w=>{
+    if(!learnActiveTypes.has(w.type))return false;
+    if(w.type==='noun'&&!learnActiveNounSubs.has(w.sub))return false;
+    return true;
+  });
+}
+function buildNounChips() {
+  const c = document.getElementById('noun-chips');
+  c.innerHTML = '';
+  const subs = Object.fromEntries(
+    Object.entries(SUB_LABELS).filter(([k])=>['people','body','animals','food','places','time','objects','nature','custom'].includes(k))
+  );
+  // Only show custom if there are custom words
+  if(!customWords.length) delete subs.custom;
+  Object.entries(subs).forEach(([k,v])=>{
+    const el=document.createElement('button');
+    el.className='chip cat-noun active';
+    el.textContent=v;
+    el.onclick=()=>toggleNounSub(k,el);
+    c.appendChild(el);
+  });
+}
+function buildBrowseChips() {
+  const c=document.getElementById('browse-chips');
+  c.innerHTML='';
+  const all=document.createElement('button');
+  all.className='chip active';all.textContent='All';all.onclick=()=>setBrowseFilter('all',all);
+  c.appendChild(all);
+  Object.entries(TYPE_LABELS).forEach(([k,v])=>{
+    const el=document.createElement('button');el.className='chip';el.textContent=v;
+    el.onclick=()=>setBrowseFilter(k,el);c.appendChild(el);
+  });
+  ['people','body','animals','food','places','time','objects','nature'].forEach(k=>{
+    const el=document.createElement('button');el.className='chip';el.textContent=SUB_LABELS[k];
+    el.onclick=()=>setBrowseFilter('sub:'+k,el);c.appendChild(el);
+  });
+  if(customWords.length){
+    const el=document.createElement('button');el.className='chip';el.textContent='My Custom';
+    el.onclick=()=>setBrowseFilter('sub:custom',el);c.appendChild(el);
+  }
+}
+function toggleType(k,el){
+  if(activeTypes.has(k))activeTypes.delete(k);else activeTypes.add(k);
+  el.classList.toggle('active');applyFilters();
+}
+function toggleNounSub(k,el){
+  if(activeNounSubs.has(k))activeNounSubs.delete(k);else activeNounSubs.add(k);
+  el.classList.toggle('active');applyFilters();
+}
+function setBrowseFilter(f,el){
+  browseFilter=f;
+  document.querySelectorAll('#browse-chips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');renderBrowse();
+}
+function applyFilters(){
+  filteredWords=WORDS.filter(w=>{
+    if(!activeTypes.has(w.type))return false;
+    if(w.type==='noun'&&!activeNounSubs.has(w.sub))return false;
+    return true;
+  });
+  currentCardIndex=0;cardFlipped=false;renderCard();
+}
+function toggleDisplay(key){
+  displayShow[key]=!displayShow[key];
+  document.getElementById('toggle-'+key).classList.toggle('on',displayShow[key]);
+  renderCard();
+}
+function toggleLearnDisplay(key){
+  learnShow[key]=!learnShow[key];
+  document.getElementById('learn-toggle-'+key).classList.toggle('on',learnShow[key]);
+  nextLearnCard();
+}
+
+// ============================================================
+// FLASHCARD
+// ============================================================
+function renderCard(){
+  if(!filteredWords.length){
+    document.getElementById('fc-char').textContent='No words';
+    document.getElementById('fc-rom').textContent='';
+    document.getElementById('fc-meaning').textContent='Select a category above';
+    document.getElementById('fc-counter').textContent='0 cards';
+    return;
+  }
+  const w=filteredWords[currentCardIndex];
+  const total=filteredWords.length;
+  document.getElementById('fc-counter').textContent=`Card ${currentCardIndex+1} of ${total}`;
+  document.getElementById('fc-progress').style.width=((currentCardIndex+1)/total*100)+'%';
+  document.getElementById('fc-badge').textContent=TYPE_LABELS[w.type]||w.type;
+  document.getElementById('fc-badge').className='card-type-badge badge-'+(w.custom?'adv':w.type);
+  const subLabel=w.type==='noun'?(SUB_LABELS[w.sub]||w.sub):'';
+  document.getElementById('fc-subcat').textContent=subLabel;
+  document.getElementById('fc-subcat').style.display=subLabel?'block':'none';
+  document.getElementById('fc-char').style.display=displayShow.char?'block':'none';
+  document.getElementById('fc-char').textContent=w.char;
+  document.getElementById('fc-rom').style.display=displayShow.rom?'block':'none';
+  document.getElementById('fc-rom').textContent=w.rom;
+  document.getElementById('fc-meaning').style.display=displayShow.meaning?'block':'none';
+  document.getElementById('fc-meaning').textContent=w.meaning+(w.zh?' · '+w.zh:'');
+  document.getElementById('fc-back-char').textContent=w.char;
+  document.getElementById('fc-back-rom').textContent=w.rom;
+  document.getElementById('fc-back-meaning').textContent=w.meaning+(w.zh?' · '+w.zh:'');
+  const exDiv=document.getElementById('fc-examples');
+  exDiv.innerHTML='';
+  if(w.examples&&w.examples.length){
+    w.examples.forEach(ex=>{
+      const d=document.createElement('div');
+      d.className='example-item';
+      d.innerHTML='<span>e.g.</span> '+ex;
+      exDiv.appendChild(d);
+    });
+  }
+  if(cardFlipped){cardFlipped=false;document.getElementById('flashcard-inner').classList.remove('flipped');}
+}
+function flipCard(){
+  cardFlipped=!cardFlipped;
+  document.getElementById('flashcard-inner').classList.toggle('flipped',cardFlipped);
+}
+function nextCard(){
+  if(!filteredWords.length)return;
+  currentCardIndex=(currentCardIndex+1)%filteredWords.length;
+  cardFlipped=false;renderCard();
+}
+function prevCard(){
+  if(!filteredWords.length)return;
+  currentCardIndex=(currentCardIndex-1+filteredWords.length)%filteredWords.length;
+  cardFlipped=false;renderCard();
+}
+function shuffleCards(){
+  for(let i=filteredWords.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[filteredWords[i],filteredWords[j]]=[filteredWords[j],filteredWords[i]];}
+  currentCardIndex=0;cardFlipped=false;renderCard();
+}
+
+// ============================================================
+// LEARN MODE
+// ============================================================
+function updateLearnStats(){
+  document.getElementById('learn-correct').textContent=learnCorrect;
+  document.getElementById('learn-wrong').textContent=learnWrong;
+  const pool=getLearnPool();const due=pool.filter(w=>{const s=learnScores[wordKey(w)];return!s||s.dueIn<=0;}).length;
+  document.getElementById('learn-due').textContent=due;
+}
+function getLearnWord(){
+  const pool=getLearnPool();
+  const candidates=pool.map((w,i)=>({w,i:WORDS.indexOf(w),s:learnScores[wordKey(w)]||{correct:0,wrong:0,interval:1,dueIn:0}}))
+    .filter(({s})=>s.dueIn<=0)
+    .sort((a,b)=>(b.s.wrong-a.s.wrong)||(a.s.correct-b.s.correct)||(Math.random()-0.5));
+  if(!candidates.length){const p=getLearnPool();return WORDS.indexOf(p[Math.floor(Math.random()*p.length)]);}
+  return candidates[0].i;
+}
+function nextLearnCard(){
+  learnAnswered=false;
+  const fb=document.getElementById('learn-feedback');
+  if(fb)fb.classList.add('hidden');
+  const nx=document.getElementById('learn-next');
+  if(nx)nx.classList.add('hidden');
+  document.querySelectorAll('.learn-option').forEach(o=>o.classList.remove('disabled','correct','wrong'));
+  if(!WORDS.length)return;
+  const wi=getLearnWord();
+  learnCurrentWord=wi;
+  const w=WORDS[wi];
+  const s=ensureScore(w);
+  s.seen=true;
+
+  const enabled=['char','rom','meaning'].filter(f=>learnShow[f]);
+  const pool=enabled.length>=2?enabled:['char','meaning'];
+  const qField=pool[Math.floor(Math.random()*pool.length)];
+  const answerPool=pool.filter(f=>f!==qField);
+  const aField=answerPool.length?answerPool[Math.floor(Math.random()*answerPool.length)]:(qField==='meaning'?'char':'meaning');
+  const fieldLabels={char:'character',rom:'romanisation',meaning:'meaning'};
+  const correctAnswer=w[aField]||w.meaning;
+
+  const qEl=document.getElementById('learn-question');
+  if(qField==='char')qEl.className='learn-question';
+  else if(qField==='rom')qEl.className='learn-question romaji';
+  else qEl.className='learn-question meaning';
+  document.getElementById('learn-prompt').textContent=`What is the ${fieldLabels[aField]}?`;
+  qEl.textContent=w[qField]||w.char;
+
+  const hintFields=pool.filter(f=>f!==qField&&f!==aField);
+  let hintHtml='';
+  hintFields.forEach(f=>{const val=w[f];if(val)hintHtml+=`<div style="font-size:13px;color:var(--text3);text-align:center;margin-top:2px">${val}</div>`;});
+  document.getElementById('learn-hint').innerHTML=hintHtml;
+
+  const distractors=getDistractors(wi,aField);
+  const options=shuffle([correctAnswer,...distractors.slice(0,3)]);
+  const container=document.getElementById('learn-options');
+  container.innerHTML='';
+  options.forEach(opt=>{
+    const btn=document.createElement('button');
+    btn.className='learn-option';
+    btn.textContent=opt;
+    btn.type='button';
+    btn.onclick=()=>answerLearn(opt,correctAnswer,wi);
+    container.appendChild(btn);
+  });
+  updateLearnStats();
+}
+function getDistractors(wi,field){
+  return shuffle(WORDS.map((w,i)=>({w,i})).filter(({i})=>i!==wi)).slice(0,3).map(({w})=>w[field]||w.meaning);
+}
+function answerLearn(chosen,correct,wi){
+  if(learnAnswered)return;
+  learnAnswered=true;
+  const isCorrect=chosen===correct;
+  const w=WORDS[wi];
+  const s=ensureScore(w);
+  if(isCorrect){s.correct++;s.interval=Math.min(s.interval*2,20);s.dueIn=s.interval;learnCorrect++;}
+  else{s.wrong++;s.interval=1;s.dueIn=0;learnWrong++;}
+  Object.values(learnScores).forEach(sc=>{if(sc.dueIn>0)sc.dueIn--;});
+  saveScores();
+  document.querySelectorAll('.learn-option').forEach(btn=>{
+    btn.classList.add('disabled');
+    if(btn.textContent===correct)btn.classList.add('correct');
+    else if(btn.textContent===chosen&&!isCorrect)btn.classList.add('wrong');
+  });
+  const fb=document.getElementById('learn-feedback');
+  fb.classList.remove('hidden','correct','wrong');
+  if(isCorrect){fb.textContent='✓ Correct! '+w.char+' ('+w.rom+') — '+w.meaning;fb.classList.add('correct');}
+  else{fb.textContent='✗ Answer: '+correct+' — '+w.meaning;fb.classList.add('wrong');}
+  document.getElementById('learn-next').classList.remove('hidden');
+  updateLearnStats();
+}
+
+// ============================================================
+// PROGRESS TAB
+// ============================================================
+function getMasteryLevel(s){
+  if(!s||!s.seen)return'unseen';
+  if(s.correct>=3&&s.correct>s.wrong*2)return'mastered';
+  return'learning';
+}
+let progressCatFilter='all';
+function buildProgressCatChips(){
+  const c=document.getElementById('progress-cat-chips');
+  if(!c)return;
+  c.innerHTML='';
+  const all=document.createElement('button');
+  all.className='chip active';all.textContent='All';
+  all.onclick=()=>setProgressCat('all',all);c.appendChild(all);
+  Object.entries(TYPE_LABELS).forEach(([k,v])=>{
+    const el=document.createElement('button');el.className='chip';el.textContent=v;
+    el.onclick=()=>setProgressCat('type:'+k,el);c.appendChild(el);
+  });
+  ['people','body','animals','food','places','time','objects','nature'].forEach(k=>{
+    const el=document.createElement('button');el.className='chip';el.textContent=SUB_LABELS[k]||k;
+    el.onclick=()=>setProgressCat('sub:'+k,el);c.appendChild(el);
+  });
+  if(customWords.length){
+    const el=document.createElement('button');el.className='chip';el.textContent='My Custom';
+    el.onclick=()=>setProgressCat('sub:custom',el);c.appendChild(el);
+  }
+}
+function setProgressCat(f,el){
+  progressCatFilter=f;
+  document.querySelectorAll('#progress-cat-chips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderProgress();
+}
+function renderProgress(){
+  buildProgressCatChips();
+  let scoreWords=WORDS;
+  if(progressCatFilter!=='all'){
+    if(progressCatFilter.startsWith('type:'))scoreWords=scoreWords.filter(w=>w.type===progressCatFilter.slice(5));
+    else if(progressCatFilter.startsWith('sub:'))scoreWords=scoreWords.filter(w=>w.sub===progressCatFilter.slice(4));
+  }
+  const allScores=scoreWords.map(w=>({w,s:learnScores[wordKey(w)]||{correct:0,wrong:0,interval:1,dueIn:0,seen:false}}));
+  const totalScores=WORDS.map(w=>learnScores[wordKey(w)]||{correct:0,wrong:0,interval:1,dueIn:0,seen:false});
+  const mastered=totalScores.filter(s=>getMasteryLevel(s)==='mastered').length;
+  const learning=totalScores.filter(s=>getMasteryLevel(s)==='learning').length;
+  const unseen=totalScores.filter(s=>getMasteryLevel(s)==='unseen').length;
+  document.getElementById('prog-mastered').textContent=mastered;
+  document.getElementById('prog-learning').textContent=learning;
+  document.getElementById('prog-unseen').textContent=unseen;
+  const pct=WORDS.length?Math.round(mastered/WORDS.length*100):0;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  document.getElementById('prog-bar').style.width=pct+'%';
+
+  let filtered=allScores;
+  if(progressFilter==='mastered')filtered=allScores.filter(({s})=>getMasteryLevel(s)==='mastered');
+  else if(progressFilter==='learning')filtered=allScores.filter(({s})=>getMasteryLevel(s)==='learning');
+  else if(progressFilter==='unseen')filtered=allScores.filter(({s})=>getMasteryLevel(s)==='unseen');
+
+  const list=document.getElementById('progress-list');
+  list.innerHTML='';
+  filtered.forEach(({w,s})=>{
+    const level=getMasteryLevel(s);
+    const row=document.createElement('div');
+    row.className='word-progress-row';
+    const statusClass={mastered:'status-mastered',learning:'status-learning',unseen:'status-unseen'}[level];
+    const statusText={mastered:'✓ Mastered',learning:'⟳ Learning',unseen:'○ Unseen'}[level];
+    row.innerHTML=`
+      <div class="wpr-char">${w.char}</div>
+      <div class="wpr-info">
+        <div class="wpr-rom">${w.rom}</div>
+        <div class="wpr-meaning">${w.meaning}</div>
+      </div>
+      <div class="wpr-status">
+        <span class="status-pill ${statusClass}">${statusText}</span>
+        ${s.seen?`<span class="wpr-score">${s.correct}✓ ${s.wrong}✗</span>`:''}
+      </div>
+      <button class="reset-word-btn" onclick="resetWordScore('${wordKey(w).replace(/'/g,"\\'")}',this)" title="Reset this word">↺</button>
+    `;
+    list.appendChild(row);
+  });
+  if(!filtered.length){
+    list.innerHTML=`<div style="text-align:center;color:var(--text3);padding:32px;font-size:14px">No words in this category yet.</div>`;
+  }
+}
+function setProgressFilter(f){
+  progressFilter=f;
+  ['all','mastered','learning','unseen'].forEach(x=>{
+    document.getElementById('pf-'+x).classList.toggle('active',x===f);
+  });
+  renderProgress();
+}
+function resetWordScore(key,btn){
+  if(learnScores[key]){
+    learnScores[key]={correct:0,wrong:0,interval:1,dueIn:0,seen:false};
+    saveScores();
+    renderProgress();
+  }
+}
+function confirmResetAll(){
+  if(confirm('Reset all learning progress? This cannot be undone.')){
+    learnScores={};
+    learnCorrect=0;learnWrong=0;
+    WORDS.forEach(ensureScore);
+    saveScores();
+    renderProgress();
+    updateLearnStats();
+  }
+}
+
+// ============================================================
+// CUSTOM VOCABULARY
+// ============================================================
+function openAddModal(){
+  document.getElementById('add-modal').classList.remove('hidden');
+  document.getElementById('add-char').value='';
+  document.getElementById('add-rom').value='';
+  document.getElementById('add-meaning').value='';
+  document.getElementById('add-zh').value='';
+  document.getElementById('add-example').value='';
+  document.getElementById('add-error').style.display='none';
+  document.getElementById('add-type').value='noun';
+  document.getElementById('add-sub').value='custom';
+  setTimeout(()=>document.getElementById('add-char').focus(),100);
+  document.getElementById('add-sub').onchange=function(){document.getElementById('add-newcat').classList.toggle('hidden',this.value!=='__new__');};
+}
+function closeAddModal(e){
+  if(!e||e.target===document.getElementById('add-modal'))
+    document.getElementById('add-modal').classList.add('hidden');
+}
+function saveCustomWord(){
+  const char=document.getElementById('add-char').value.trim();
+  const rom=document.getElementById('add-rom').value.trim();
+  const meaning=document.getElementById('add-meaning').value.trim();
+  const zh=document.getElementById('add-zh').value.trim();
+  const type=document.getElementById('add-type').value;
+  let sub=document.getElementById('add-sub').value;
+  if(sub==='__new__'){sub=(document.getElementById('add-newcat').value.trim().toLowerCase().replace(/\s+/g,'_'))||'custom';if(!SUB_LABELS[sub])SUB_LABELS[sub]=document.getElementById('add-newcat').value.trim()||'Custom';}
+  const example=document.getElementById('add-example').value.trim();
+  const errEl=document.getElementById('add-error');
+  if(!char||!rom||!meaning){errEl.textContent='Please fill in character, romanisation, and meaning.';errEl.style.display='block';return;}
+  const newWord={char,rom,meaning,zh,type,sub,hsk:false,custom:true};
+  if(example)newWord.examples=[example];
+  customWords.push(newWord);
+  saveCustomWords();
+  rebuildWords();
+  buildNounChips();
+  buildLearnNounChips();
+  buildBrowseChips();
+  buildProgressCatChips();
+  applyFilters();
+  renderBrowse();
+  document.getElementById('word-count').textContent=WORDS.length;
+  document.getElementById('add-modal').classList.add('hidden');
+}
+function deleteCustomWord(char,rom){
+  if(!confirm('Delete "'+char+'" from your custom words?'))return;
+  customWords=customWords.filter(w=>!(w.char===char&&w.rom===rom));
+  saveCustomWords();
+  rebuildWords();
+  buildNounChips();
+  buildLearnNounChips();
+  buildBrowseChips();
+  buildProgressCatChips();
+  applyFilters();
+  renderBrowse();
+  document.getElementById('word-count').textContent=WORDS.length;
+}
+
+// ============================================================
+// SANDHI
+// ============================================================
+let sandhiShowChar=true, sandhiShowRom=true;
+let blitzShowChar=true, blitzShowRom=true;
+let currentSandhiMode='practice';
+let blitzTimer=null, blitzTimeLeft=60, blitzCorrect=0, blitzWrong=0;
+let blitzWords=[], blitzIdx=0, blitzCurrentSandhi=null, blitzActive=false;
+const BLITZ_HS_KEY='tw_blitz_hs';
+
+function detectTone(s){
+  const stop=/[ptk]h?$/.test(s.replace(/[āáàâa̍ēéèêe̍īíìîi̍ōóòôo̍ūúùûu̍]/gi,'X'));
+  if(s.includes('ā')||s.includes('ē')||s.includes('ō')||s.includes('ū'))return 7;
+  if(/[áéíóú]/.test(s))return stop?8:2;
+  if(/[àèìòù]/.test(s))return 3;
+  if(/[âêîôû]/.test(s))return 5;
+  if(/a̍|e̍|i̍|o̍|u̍/.test(s))return 8;
+  if(stop)return 4;
+  return 1;
+}
+function sandhiOf(t){return({1:7,2:1,3:2,4:8,5:7,7:3,8:4})[t]||t;}
+function getMultiSyllableWords(){return WORDS.filter(w=>w.rom.split('-').length>=2);}
+function initSandhi(){sandhiWords=shuffle(getMultiSyllableWords());sandhiIndex=0;}
+
+function setSandhiMode(mode){
+  currentSandhiMode=mode;
+  document.getElementById('smode-practice').classList.toggle('active',mode==='practice');
+  document.getElementById('smode-blitz').classList.toggle('active',mode==='blitz');
+  document.getElementById('sandhi-practice-section').classList.toggle('hidden',mode!=='practice');
+  const bs=document.getElementById('sandhi-blitz-section');
+  bs.classList.toggle('hidden',mode!=='blitz');
+  bs.style.display=mode==='blitz'?'flex':'none';
+  if(mode==='blitz'){
+    stopBlitz();
+    document.getElementById('blitz-pregame').classList.remove('hidden');
+    document.getElementById('blitz-game').classList.add('hidden');
+    document.getElementById('blitz-result').classList.add('hidden');
+  }
+  if(mode==='practice') nextSandhi();
+}
+
+// ── DISPLAY TOGGLES ──
+function toggleSandhiChar(){
+  sandhiShowChar=!sandhiShowChar;
+  document.getElementById('sandhi-show-char').classList.toggle('on',sandhiShowChar);
+  nextSandhi();
+}
+function toggleSandhiRom(){
+  sandhiShowRom=!sandhiShowRom;
+  document.getElementById('sandhi-show-rom').classList.toggle('on',sandhiShowRom);
+  nextSandhi();
+}
+function toggleBlitzChar(){
+  blitzShowChar=!blitzShowChar;
+  document.getElementById('blitz-show-char').classList.toggle('on',blitzShowChar);
+}
+function toggleBlitzRom(){
+  blitzShowRom=!blitzShowRom;
+  document.getElementById('blitz-show-rom').classList.toggle('on',blitzShowRom);
+}
+
+// ── PRACTICE MODE ──
+function buildSandhiDisplay(containerId, w, parts, askIdx, showChar, showRom){
+  const display=document.getElementById(containerId);
+  display.innerHTML='';
+  const chars=[...w.char];
+  parts.forEach((p,i)=>{
+    const syl=document.createElement('div');syl.className='sandhi-syllable';
+    if(showChar){
+      const ch=document.createElement('div');ch.className='sandhi-char';
+      ch.textContent=chars[i]||'';
+      if(i===askIdx)ch.style.color='var(--accent)';
+      syl.appendChild(ch);
+    }
+    if(showRom){
+      const rom=document.createElement('div');rom.className='sandhi-rom';
+      rom.textContent=i===askIdx?'???':p;
+      if(i===askIdx)rom.style.color='var(--accent)';
+      syl.appendChild(rom);
+    }
+    display.appendChild(syl);
+    if(i<parts.length-1){const arr=document.createElement('div');arr.className='sandhi-arrow';arr.textContent='+';display.appendChild(arr);}
+  });
+}
+
+function nextSandhi(){
+  selectedTone=null;sandhiAnswered=false;
+  document.getElementById('sandhi-feedback').classList.add('hidden');
+  document.getElementById('sandhi-next-btn').classList.add('hidden');
+  document.getElementById('sandhi-submit').disabled=true;
+  document.querySelectorAll('#sandhi-tone-buttons .tone-btn').forEach(b=>b.classList.remove('selected','correct-ans','wrong-ans'));
+  if(sandhiIndex>=sandhiWords.length){sandhiWords=shuffle(getMultiSyllableWords());sandhiIndex=0;}
+  const w=sandhiWords[sandhiIndex++];
+  const parts=w.rom.split('-');
+  const askIdx=Math.floor(Math.random()*(parts.length-1));
+  const originalTone=detectTone(parts[askIdx]);
+  const expectedSandhi=sandhiOf(originalTone);
+  window._currentSandhi={w,parts,askIdx,originalTone,expectedSandhi};
+  buildSandhiDisplay('sandhi-display',w,parts,askIdx,sandhiShowChar,sandhiShowRom);
+  document.getElementById('sandhi-question').textContent=`"${parts[askIdx]}" (tone ${originalTone}) → what sandhi tone?`;
+}
+function selectTone(t){
+  if(sandhiAnswered)return;selectedTone=t;
+  document.querySelectorAll('#sandhi-tone-buttons .tone-btn').forEach(b=>{
+    b.classList.toggle('selected',parseInt(b.dataset.tone)===t);
+  });
+  document.getElementById('sandhi-submit').disabled=false;
+}
+function submitSandhi(){
+  if(selectedTone===null||sandhiAnswered)return;sandhiAnswered=true;
+  const{parts,askIdx,originalTone,expectedSandhi}=window._currentSandhi;
+  const isCorrect=selectedTone===expectedSandhi;
+  document.querySelectorAll('#sandhi-tone-buttons .tone-btn').forEach(b=>{
+    const t=parseInt(b.dataset.tone);
+    if(t===expectedSandhi)b.classList.add('correct-ans');
+    else if(t===selectedTone&&!isCorrect)b.classList.add('wrong-ans');
+  });
+  const fb=document.getElementById('sandhi-feedback');
+  fb.classList.remove('hidden','correct','wrong');
+  if(isCorrect){fb.textContent=`✓ Correct! Tone ${originalTone} → Tone ${expectedSandhi}.`;fb.classList.add('correct');sandhiCorrect++;}
+  else{fb.textContent=`✗ Tone ${originalTone} → Tone ${expectedSandhi} (not ${selectedTone}).`;fb.classList.add('wrong');sandhiWrong++;}
+  document.getElementById('sandhi-correct').textContent=sandhiCorrect;
+  document.getElementById('sandhi-wrong').textContent=sandhiWrong;
+  document.getElementById('sandhi-next-btn').classList.remove('hidden');
+}
+
+// ── BLITZ MODE ──
+function nextBlitzWord(){
+  if(blitzIdx>=blitzWords.length){blitzWords=shuffle(getMultiSyllableWords());blitzIdx=0;}
+  const w=blitzWords[blitzIdx++];
+  const parts=w.rom.split('-');
+  const askIdx=Math.floor(Math.random()*(parts.length-1));
+  const originalTone=detectTone(parts[askIdx]);
+  const expectedSandhi=sandhiOf(originalTone);
+  blitzCurrentSandhi={w,parts,askIdx,originalTone,expectedSandhi};
+  buildSandhiDisplay('blitz-word-display',w,parts,askIdx,blitzShowChar,blitzShowRom);
+  document.getElementById('blitz-question').textContent=`"${parts[askIdx]}" (tone ${originalTone}) → sandhi tone?`;
+  document.querySelectorAll('#blitz-tone-buttons .tone-btn').forEach(b=>b.classList.remove('selected','correct-ans','wrong-ans'));
+}
+function blitzAnswer(t){
+  if(!blitzActive||!blitzCurrentSandhi)return;
+  const{expectedSandhi}=blitzCurrentSandhi;
+  const isCorrect=t===expectedSandhi;
+  // Flash feedback
+  const fl=document.getElementById('blitz-flash');
+  fl.className='blitz-flash '+(isCorrect?'correct':'wrong');
+  fl.style.opacity='1';
+  setTimeout(()=>{fl.style.opacity='0';},120);
+  // Highlight button briefly
+  document.querySelectorAll('#blitz-tone-buttons .tone-btn').forEach(b=>{
+    const bt=parseInt(b.dataset.tone);
+    if(bt===expectedSandhi)b.classList.add('correct-ans');
+    else if(bt===t&&!isCorrect)b.classList.add('wrong-ans');
+  });
+  if(isCorrect)blitzCorrect++;else blitzWrong++;
+  document.getElementById('blitz-correct-live').textContent=blitzCorrect+'✓';
+  document.getElementById('blitz-wrong-live').textContent=blitzWrong+'✗';
+  setTimeout(nextBlitzWord,isCorrect?80:400);
+}
+function updateBlitzTimer(){
+  if(!blitzActive)return;
+  blitzTimeLeft--;
+  const pct=blitzTimeLeft/60*100;
+  const timeEl=document.getElementById('blitz-time');
+  const bar=document.getElementById('blitz-bar');
+  timeEl.textContent=blitzTimeLeft;
+  bar.style.width=pct+'%';
+  const urgent=blitzTimeLeft<=10;
+  timeEl.classList.toggle('urgent',urgent);
+  bar.classList.toggle('urgent',urgent);
+  if(blitzTimeLeft<=0){endBlitz();return;}
+  blitzTimer=setTimeout(updateBlitzTimer,1000);
+}
+function startBlitz(){
+  blitzCorrect=0;blitzWrong=0;blitzTimeLeft=60;blitzActive=true;
+  blitzWords=shuffle(getMultiSyllableWords());blitzIdx=0;
+  document.getElementById('blitz-pregame').classList.add('hidden');
+  document.getElementById('blitz-result').classList.add('hidden');
+  document.getElementById('blitz-game').classList.remove('hidden');
+  document.getElementById('blitz-correct-live').textContent='0✓';
+  document.getElementById('blitz-wrong-live').textContent='0✗';
+  document.getElementById('blitz-bar').style.width='100%';
+  document.getElementById('blitz-bar').classList.remove('urgent');
+  document.getElementById('blitz-time').classList.remove('urgent');
+  nextBlitzWord();
+  blitzTimer=setTimeout(updateBlitzTimer,1000);
+}
+function stopBlitz(){
+  blitzActive=false;
+  if(blitzTimer){clearTimeout(blitzTimer);blitzTimer=null;}
+}
+function endBlitz(){
+  stopBlitz();
+  document.getElementById('blitz-game').classList.add('hidden');
+  document.getElementById('blitz-result').classList.remove('hidden');
+  document.getElementById('blitz-final-score').textContent=blitzCorrect;
+  document.getElementById('blitz-res-correct').textContent=blitzCorrect+'✓';
+  document.getElementById('blitz-res-wrong').textContent=blitzWrong+'✗';
+  const total=blitzCorrect+blitzWrong;
+  const acc=total?Math.round(blitzCorrect/total*100):0;
+  document.getElementById('blitz-res-acc').textContent=acc+'% accuracy';
+  // High score
+  let hs=0;try{hs=parseInt(localStorage.getItem(BLITZ_HS_KEY))||0;}catch(e){}
+  const hsEl=document.getElementById('blitz-hs');
+  if(blitzCorrect>hs){
+    try{localStorage.setItem(BLITZ_HS_KEY,blitzCorrect);}catch(e){}
+    hsEl.textContent='🏆 New personal best!';
+  } else {
+    hsEl.textContent='Personal best: '+hs;
+  }
+}
+
+// ── KEYBOARD HANDLER ──
+document.addEventListener('keydown',function(e){
+  const activeTab=document.querySelector('.tab.active');
+  if(!activeTab||!activeTab.textContent.includes('Sandhi'))return;
+  const key=e.key;
+  const toneMap={'1':1,'2':2,'3':3,'4':4,'5':5,'7':7,'8':8,'0':0};
+  if(!(key in toneMap))return;
+  const t=toneMap[key];
+  e.preventDefault();
+  if(currentSandhiMode==='practice'){
+    if(sandhiAnswered){nextSandhi();return;}
+    selectTone(t);
+    submitSandhi();
+  } else if(currentSandhiMode==='blitz'&&blitzActive){
+    blitzAnswer(t);
+  }
+});
+
+// ============================================================
+// BROWSE
+// ============================================================
+function setBrowseView(v){
+  browseView=v;
+  document.getElementById('view-grid').classList.toggle('active',v==='grid');
+  document.getElementById('view-list').classList.toggle('active',v==='list');
+  renderBrowse();
+}
+function renderBrowse(){
+  let words=WORDS;
+  if(browseFilter!=='all'){
+    if(browseFilter.startsWith('sub:'))words=words.filter(w=>w.sub===browseFilter.slice(4));
+    else words=words.filter(w=>w.type===browseFilter);
+  }
+  const grid=document.getElementById('browse-grid');
+  grid.style.gridTemplateColumns=browseView==='grid'?'repeat(auto-fill,minmax(190px,1fr))':'1fr';
+  grid.innerHTML='';
+  words.forEach(w=>{
+    const tile=document.createElement('div');tile.className='word-tile';
+    tile.innerHTML=`
+      <div class="tile-char">${w.char}</div>
+      <div class="tile-rom">${w.rom}</div>
+      <div class="tile-meaning">${w.meaning}${w.zh?' · '+w.zh:''}</div>
+      <span class="tile-badge badge-${w.type}">${TYPE_LABELS[w.type]||w.type}${w.type==='noun'?' · '+(SUB_LABELS[w.sub]||w.sub):''}</span>
+      ${w.hsk?'<span class="tile-badge" style="margin-left:4px;background:rgba(232,162,60,0.15);color:var(--accent)">HSK ★</span>':''}
+      ${w.custom?'<span class="tile-badge custom-tag" style="margin-left:4px">Custom</span>':''}
+      ${w.custom?`<button onclick="deleteCustomWord('${w.char.replace(/'/g,"\\'")}','${w.rom.replace(/'/g,"\\'")}')" style="position:absolute;bottom:8px;right:8px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text3);padding:3px;" title="Delete">🗑</button>`:''}
+    `;
+    grid.appendChild(tile);
+  });
+}
+
+function toggleRules(){
+  const c=document.getElementById('rules-content');
+  const a=document.getElementById('rules-arrow');
+  const hidden=c.classList.toggle('rules-collapsed');
+  a.textContent=hidden?'▶':'▼';
+}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+window.onload=init;
+</script>
+</body>
+</html>
